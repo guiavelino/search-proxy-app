@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { SearchResult, HistoryEntry } from '@/features/search/model/search'
-import { searchApi } from '@/features/search/services/search-api'
+import { searchService } from '@/features/search/services/search.service'
 
 const RESULTS_PER_PAGE = 5
 
@@ -36,7 +36,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     set({ isLoading: true, error: null, query, currentPage: 1 })
 
     try {
-      const results = await searchApi.searchByGet(query)
+      const results = await searchService.executeSearch(query)
       set({ results, isLoading: false })
 
       // Reload history after a search (backend saves it)
@@ -54,7 +54,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
 
   loadHistory: async () => {
     try {
-      const history = await searchApi.getHistory()
+      const history = await searchService.getHistory()
       set({ history })
     } catch {
       // Silently fail — history is non-critical

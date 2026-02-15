@@ -1,16 +1,11 @@
 import { httpClient } from '@/shared/lib/http'
 import type { SearchResult, HistoryEntry } from '@/features/search/model/search'
 
-export const searchApi = {
-  async searchByGet(query: string): Promise<SearchResult[]> {
+export const searchService = {
+  async executeSearch(query: string): Promise<SearchResult[]> {
     const { data } = await httpClient.get<SearchResult[]>('/search', {
       params: { q: query },
     })
-    return data
-  },
-
-  async searchByPost(query: string): Promise<SearchResult[]> {
-    const { data } = await httpClient.post<SearchResult[]>('/search', { query })
     return data
   },
 
