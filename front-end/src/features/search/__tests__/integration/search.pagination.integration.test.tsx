@@ -1,0 +1,105 @@
+import { describe, it, expect, beforeEach } from 'vitest'
+import { render, screen } from '@/shared/test/render'
+import userEvent from '@testing-library/user-event'
+import { Pagination } from '@/features/search/components/Pagination'
+import { useSearchStore } from '@/features/search/store/search-store'
+import { mockSearchResults } from '@/shared/test/mocks/handlers'
+
+describe('Pagination (Integration)', () => {
+  beforeEach(() => {
+    useSearchStore.setState({
+      query: 'react',
+      results: [],
+      history: [],
+      currentPage: 1,
+      isLoading: false,
+      error: null,
+    })
+  })
+
+  it('should render nothing when there are no results', () => {
+    const { container } = render(<Pagination />)
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('should render nothing when results fit in one page', () => {
+    useSearchStore.setState({
+      results: mockSearchResults.slice(0, 3),
+    })
+    const { container } = render(<Pagination />)
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('should render pagination when results span multiple pages', () => {
+    useSearchStore.setState({ results: mockSearchResults })
+    render(<Pagination />)
+
+    expect(
+      screen.getByLabelText('Search results pagination'),
+    ).toBeInTheDocument()
+  })
+
+  it('should display page numbers', () => {
+    useSearchStore.setState({ results: mockSearchResults })
+    render(<Pagination />)
+
+    expect(screen.getByText('1')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+    expect(screen.getByText('3')).toBeInTheDocument()
+  })
+
+  it('should highlight the current page', () => {
+    useSearchStore.setState({ results: mockSearchResults, currentPage: 1 })
+    render(<Pagination />)
+
+    expect(screen.getByLabelText('Go to page 1')).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+  })
+
+  it('should disable Previous button on first page', () => {
+    useSearchStore.setState({ results: mockSearchResults, currentPage: 1 })
+    render(<Pagination />)
+
+    expect(screen.getByLabelText('Go to previous page')).toBeDisabled()
+  })
+
+  it('should disable Next button on last page', () => {
+    const totalPages = Math.ceil(mockSearchResults.length / 5)
+    useSearchStore.setState({
+      results: mockSearchResults,
+      currentPage: totalPages,
+    })
+    render(<Pagination />)
+
+    expect(screen.getByLabelText('Go to next page')).toBeDisabled()
+  })
+
+  it('should navigate to next page when Next is clicked', async () => {
+    const user = userEvent.setup()
+    useSearchStore.setState({ results: mockSearchResults, currentPage: 1 })
+    render(<Pagination />)
+
+    await user.click(screen.getByLabelText('Go to next page'))
+    expect(useSearchStore.getState().currentPage).toBe(2)
+  })
+
+  it('should navigate to previous page when Previous is clicked', async () => {
+    const user = userEvent.setup()
+    useSearchStore.setState({ results: mockSearchResults, currentPage: 2 })
+    render(<Pagination />)
+
+    await user.click(screen.getByLabelText('Go to previous page'))
+    expect(useSearchStore.getState().currentPage).toBe(1)
+  })
+
+  it('should navigate to a specific page when page number is clicked', async () => {
+    const user = userEvent.setup()
+    useSearchStore.setState({ results: mockSearchResults, currentPage: 1 })
+    render(<Pagination />)
+
+    await user.click(screen.getByLabelText('Go to page 3'))
+    expect(useSearchStore.getState().currentPage).toBe(3)
+  })
+})

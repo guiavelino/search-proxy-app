@@ -1,0 +1,78 @@
+@use '../../../../shared/styles/variables' as *;
+
+.history-sidebar {
+  width: $sidebar-width;
+  min-width: $sidebar-width;
+  padding: 20px;
+  background: $color-bg-sidebar;
+  border-right: 1px solid $color-border;
+  height: 100vh;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $color-text-sidebar;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__empty {
+    font-size: 0.85rem;
+    color: $color-text-muted;
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__item {
+    width: 100%;
+  }
+
+  &__button {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: $radius-md;
+    cursor: pointer;
+    text-align: left;
+    transition: all $transition-fast;
+
+    &:hover {
+      background: $color-bg;
+      border-color: $color-border;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__query {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: $color-text-sidebar-item;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__time {
+    font-size: 0.75rem;
+    color: $color-text-muted;
+  }
+}

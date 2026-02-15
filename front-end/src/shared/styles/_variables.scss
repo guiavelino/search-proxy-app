@@ -1,0 +1,45 @@
+// Colors — Design Tokens
+$color-primary: #4f46e5;
+$color-primary-dark: #4338ca;
+$color-primary-light: rgba(79, 70, 229, 0.15);
+$color-primary-subtle: rgba(79, 70, 229, 0.1);
+
+$color-text: #1a202c;
+$color-text-secondary: #64748b;
+$color-text-muted: #94a3b8;
+$color-text-sidebar: #475569;
+$color-text-sidebar-item: #1e293b;
+
+$color-bg: #fff;
+$color-bg-sidebar: #f8fafc;
+$color-bg-hover: #f1f5f9;
+
+$color-border: #e2e8f0;
+
+$color-highlight-bg: #fef08a;
+$color-highlight-text: #92400e;
+$color-match-bg: #fef3c7;
+$color-match-text: #d97706;
+
+$color-error: #dc2626;
+$color-error-bg: #fef2f2;
+$color-error-border: #fecaca;
+
+// Typography
+$font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  Oxygen, Ubuntu, Cantarell, sans-serif;
+
+// Border Radius
+$radius-sm: 2px;
+$radius-md: 6px;
+$radius-lg: 8px;
+$radius-pill: 12px;
+$radius-full: 50%;
+
+// Transitions
+$transition-fast: 0.2s ease;
+
+// Layout
+$sidebar-width: 260px;
+$content-max-width: 640px;
+$app-max-width: 800px;

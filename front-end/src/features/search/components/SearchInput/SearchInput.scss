@@ -1,0 +1,64 @@
+@use '../../../../shared/styles/variables' as *;
+@use '../../../../shared/styles/mixins' as *;
+
+.search-input {
+  width: 100%;
+  max-width: $content-max-width;
+  margin: 0 auto;
+
+  &__wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  &__field {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 1rem;
+    border: 2px solid $color-border;
+    border-radius: $radius-lg;
+    outline: none;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+    background: $color-bg;
+    color: $color-text;
+
+    &:focus {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px $color-primary-light;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__button {
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $color-bg;
+    background: $color-primary;
+    border: none;
+    border-radius: $radius-lg;
+    cursor: pointer;
+    transition: background $transition-fast, opacity $transition-fast;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-dark;
+    }
+
+    &:disabled {
+      @include disabled-state;
+    }
+  }
+
+  &__spinner {
+    @include spinner(20px, 2px, #fff);
+  }
+}
