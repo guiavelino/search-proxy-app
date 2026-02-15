@@ -19,27 +19,35 @@ describe('HistorySidebar (Integration)', () => {
   })
 
   it('should render the sidebar with title', () => {
+    // Act
     render(<HistorySidebar />)
 
+    // Assert
     expect(screen.getByText('Search History')).toBeInTheDocument()
   })
 
   it('should show empty message when no history exists', async () => {
+    // Arrange
     server.use(
       http.get('http://localhost:3000/search/history', () => {
         return HttpResponse.json([])
       }),
     )
+
+    // Act
     render(<HistorySidebar />)
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText('No search history yet.')).toBeInTheDocument()
     })
   })
 
   it('should load and display history from API', async () => {
+    // Act
     render(<HistorySidebar />)
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText('react')).toBeInTheDocument()
       expect(screen.getByText('typescript')).toBeInTheDocument()
@@ -47,34 +55,39 @@ describe('HistorySidebar (Integration)', () => {
   })
 
   it('should trigger a search when a history item is clicked', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<HistorySidebar />)
-
     await waitFor(() => {
       expect(screen.getByText('react')).toBeInTheDocument()
     })
 
+    // Act
     await user.click(screen.getByText('react'))
 
+    // Assert
     await waitFor(() => {
       expect(useSearchStore.getState().query).toBe('react')
     })
   })
 
   it('should display history items with formatted dates', async () => {
+    // Act
     render(<HistorySidebar />)
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByText('react')).toBeInTheDocument()
     })
-
     const dateElements = screen.getAllByText(/\d{1,2}\/\d{1,2}\/\d{4}/)
     expect(dateElements.length).toBeGreaterThan(0)
   })
 
   it('should have proper accessibility attributes', () => {
+    // Act
     render(<HistorySidebar />)
 
+    // Assert
     expect(screen.getByLabelText('Search history')).toBeInTheDocument()
   })
 })

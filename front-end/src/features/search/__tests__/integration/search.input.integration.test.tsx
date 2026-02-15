@@ -17,69 +17,91 @@ describe('SearchInput (Integration)', () => {
   })
 
   it('should render the search input and button', () => {
+    // Act
     render(<SearchInput />)
 
+    // Assert
     expect(screen.getByLabelText('Search query')).toBeInTheDocument()
     expect(screen.getByLabelText('Submit search')).toBeInTheDocument()
   })
 
   it('should display placeholder text', () => {
+    // Act
     render(<SearchInput />)
 
+    // Assert
     expect(
       screen.getByPlaceholderText('Search for anything...'),
     ).toBeInTheDocument()
   })
 
   it('should update input value when typing', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<SearchInput />)
 
+    // Act
     const input = screen.getByLabelText('Search query')
     await user.type(input, 'react')
 
+    // Assert
     expect(input).toHaveValue('react')
   })
 
   it('should disable button when input is empty', () => {
+    // Act
     render(<SearchInput />)
 
+    // Assert
     expect(screen.getByLabelText('Submit search')).toBeDisabled()
   })
 
   it('should enable button when input has text', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<SearchInput />)
 
+    // Act
     await user.type(screen.getByLabelText('Search query'), 'react')
 
+    // Assert
     expect(screen.getByLabelText('Submit search')).toBeEnabled()
   })
 
   it('should trigger search on form submit', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<SearchInput />)
 
+    // Act
     await user.type(screen.getByLabelText('Search query'), 'react')
     await user.click(screen.getByLabelText('Submit search'))
 
+    // Assert
     expect(useSearchStore.getState().query).toBe('react')
   })
 
   it('should trigger search on Enter key press', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<SearchInput />)
 
+    // Act
     const input = screen.getByLabelText('Search query')
     await user.type(input, 'react{Enter}')
 
+    // Assert
     expect(useSearchStore.getState().query).toBe('react')
   })
 
   it('should disable input and button while loading', () => {
+    // Arrange
     useSearchStore.setState({ isLoading: true })
+
+    // Act
     render(<SearchInput />)
 
+    // Assert
     expect(screen.getByLabelText('Search query')).toBeDisabled()
   })
 })

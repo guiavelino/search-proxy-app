@@ -17,22 +17,19 @@ describe('Search Flow (Integration)', () => {
   })
 
   it('should complete a full search flow: type, submit, see results', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<App />)
 
-    // 1. Type a query
+    // Act
     const input = screen.getByLabelText('Search query')
     await user.type(input, 'react')
-
-    // 2. Submit the form
     await user.click(screen.getByLabelText('Submit search'))
 
-    // 3. Wait for results to appear
+    // Assert
     await waitFor(() => {
       expect(screen.getByText('12 results found')).toBeInTheDocument()
     })
-
-    // 4. Verify results are paginated (only 5 visible in the results list)
     const allLists = screen.getAllByRole('list')
     const resultList = allLists.find(
       (list) => !list.closest('.history-sidebar'),
@@ -42,21 +39,19 @@ describe('Search Flow (Integration)', () => {
   })
 
   it('should navigate between pages', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<App />)
-
-    // Search first
     await user.type(screen.getByLabelText('Search query'), 'react')
     await user.click(screen.getByLabelText('Submit search'))
-
     await waitFor(() => {
       expect(screen.getByText('12 results found')).toBeInTheDocument()
     })
 
-    // Click page 2
+    // Act
     await user.click(screen.getByLabelText('Go to page 2'))
 
-    // Verify page 2 is now active
+    // Assert
     expect(screen.getByLabelText('Go to page 2')).toHaveAttribute(
       'aria-current',
       'page',
@@ -64,25 +59,27 @@ describe('Search Flow (Integration)', () => {
   })
 
   it('should highlight matching terms in results', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<App />)
 
+    // Act
     await user.type(screen.getByLabelText('Search query'), 'React')
     await user.click(screen.getByLabelText('Submit search'))
 
+    // Assert
     await waitFor(() => {
       expect(screen.getByTestId('match-counter')).toBeInTheDocument()
     })
-
-    // Check that <mark> elements exist
     const marks = document.querySelectorAll('mark')
     expect(marks.length).toBeGreaterThan(0)
   })
 
   it('should load search history in sidebar', async () => {
+    // Act
     render(<App />)
 
-    // History should load automatically
+    // Assert
     await waitFor(() => {
       expect(screen.getByText('react')).toBeInTheDocument()
       expect(screen.getByText('typescript')).toBeInTheDocument()
@@ -90,23 +87,20 @@ describe('Search Flow (Integration)', () => {
   })
 
   it('should trigger search when clicking a history item', async () => {
+    // Arrange
     const user = userEvent.setup()
     render(<App />)
-
-    // Wait for history to load
     await waitFor(() => {
       expect(screen.getByText('typescript')).toBeInTheDocument()
     })
 
-    // Click on a history entry
+    // Act
     await user.click(screen.getByText('typescript'))
 
-    // Should trigger a search and show results
+    // Assert
     await waitFor(() => {
       expect(screen.getByText('12 results found')).toBeInTheDocument()
     })
-
-    // The query store should be updated
     expect(useSearchStore.getState().query).toBe('typescript')
   })
 })

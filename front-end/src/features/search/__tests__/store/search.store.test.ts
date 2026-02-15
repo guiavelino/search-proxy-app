@@ -23,7 +23,10 @@ describe('useSearchStore', () => {
 
   describe('initial state', () => {
     it('should have correct initial values', () => {
+      // Act
       const state = useSearchStore.getState()
+
+      // Assert
       expect(state.query).toBe('')
       expect(state.results).toEqual([])
       expect(state.history).toEqual([])
@@ -35,25 +38,37 @@ describe('useSearchStore', () => {
 
   describe('setQuery', () => {
     it('should update the query', () => {
+      // Act
       useSearchStore.getState().setQuery('react')
+
+      // Assert
       expect(useSearchStore.getState().query).toBe('react')
     })
   })
 
   describe('search', () => {
     it('should not search when query is empty', async () => {
+      // Act
       await useSearchStore.getState().search('')
+
+      // Assert
       expect(useSearchStore.getState().results).toEqual([])
       expect(useSearchStore.getState().isLoading).toBe(false)
     })
 
     it('should not search when query is whitespace only', async () => {
+      // Act
       await useSearchStore.getState().search('   ')
+
+      // Assert
       expect(useSearchStore.getState().results).toEqual([])
     })
 
     it('should fetch results and update state on successful search', async () => {
+      // Act
       await useSearchStore.getState().search('react')
+
+      // Assert
       const state = useSearchStore.getState()
       expect(state.results).toEqual(mockSearchResults)
       expect(state.query).toBe('react')
@@ -62,12 +77,18 @@ describe('useSearchStore', () => {
     })
 
     it('should reset currentPage to 1 on new search', async () => {
+      // Arrange
       useSearchStore.setState({ currentPage: 3 })
+
+      // Act
       await useSearchStore.getState().search('react')
+
+      // Assert
       expect(useSearchStore.getState().currentPage).toBe(1)
     })
 
     it('should set error state when API returns server error', async () => {
+      // Arrange
       server.use(
         http.get(`${API_BASE_URL}/search`, () => {
           return HttpResponse.json(
@@ -77,9 +98,11 @@ describe('useSearchStore', () => {
         }),
       )
 
+      // Act
       await useSearchStore.getState().search('react')
-      const state = useSearchStore.getState()
 
+      // Assert
+      const state = useSearchStore.getState()
       expect(state.error).toBe(
         'Failed to fetch search results. Please try again.',
       )
@@ -88,15 +111,18 @@ describe('useSearchStore', () => {
     })
 
     it('should set error state when network fails', async () => {
+      // Arrange
       server.use(
         http.get(`${API_BASE_URL}/search`, () => {
           return HttpResponse.error()
         }),
       )
 
+      // Act
       await useSearchStore.getState().search('react')
-      const state = useSearchStore.getState()
 
+      // Assert
+      const state = useSearchStore.getState()
       expect(state.error).toBe(
         'Failed to fetch search results. Please try again.',
       )
@@ -105,7 +131,7 @@ describe('useSearchStore', () => {
     })
 
     it('should discard stale responses when a newer search is triggered', async () => {
-      // Simulate a slow first request
+      // Arrange
       server.use(
         http.get(`${API_BASE_URL}/search`, async ({ request }) => {
           const url = new URL(request.url)
@@ -120,14 +146,13 @@ describe('useSearchStore', () => {
         }),
       )
 
-      // Fire slow search, then immediately fire fast search
+      // Act
       const slowPromise = useSearchStore.getState().search('slow')
       const fastPromise = useSearchStore.getState().search('fast')
-
       await Promise.all([slowPromise, fastPromise])
 
+      // Assert
       const state = useSearchStore.getState()
-      // Should keep the fast (latest) result, not the slow (stale) one
       expect(state.query).toBe('fast')
       expect(state.results).toEqual([
         { title: 'Fast Result', url: 'https://fast.com' },
@@ -141,65 +166,103 @@ describe('useSearchStore', () => {
     })
 
     it('should calculate total pages correctly', () => {
+      // Act
       const totalPages = useSearchStore.getState().getTotalPages()
+
+      // Assert
       expect(totalPages).toBe(
         Math.ceil(mockSearchResults.length / RESULTS_PER_PAGE),
       )
     })
 
     it('should return the correct paginated results for page 1', () => {
+      // Act
       const paginated = useSearchStore.getState().getPaginatedResults()
+
+      // Assert
       expect(paginated).toHaveLength(RESULTS_PER_PAGE)
       expect(paginated).toEqual(mockSearchResults.slice(0, RESULTS_PER_PAGE))
     })
 
     it('should return the correct paginated results for page 2', () => {
+      // Arrange
       useSearchStore.getState().setCurrentPage(2)
+
+      // Act
       const paginated = useSearchStore.getState().getPaginatedResults()
+
+      // Assert
       expect(paginated).toEqual(
         mockSearchResults.slice(RESULTS_PER_PAGE, RESULTS_PER_PAGE * 2),
       )
     })
 
     it('should return remaining results for the last page', () => {
+      // Arrange
       const totalPages = useSearchStore.getState().getTotalPages()
       useSearchStore.getState().setCurrentPage(totalPages)
+
+      // Act
       const paginated = useSearchStore.getState().getPaginatedResults()
+
+      // Assert
       const expectedStart = (totalPages - 1) * RESULTS_PER_PAGE
       expect(paginated).toEqual(mockSearchResults.slice(expectedStart))
     })
 
     it('should update current page', () => {
+      // Act
       useSearchStore.getState().setCurrentPage(2)
+
+      // Assert
       expect(useSearchStore.getState().currentPage).toBe(2)
     })
 
     it('should ignore page below 1', () => {
+      // Act
       useSearchStore.getState().setCurrentPage(0)
+
+      // Assert
       expect(useSearchStore.getState().currentPage).toBe(1)
     })
 
     it('should ignore negative page numbers', () => {
+      // Act
       useSearchStore.getState().setCurrentPage(-5)
+
+      // Assert
       expect(useSearchStore.getState().currentPage).toBe(1)
     })
 
     it('should ignore page above total pages', () => {
+      // Arrange
       const totalPages = useSearchStore.getState().getTotalPages()
+
+      // Act
       useSearchStore.getState().setCurrentPage(totalPages + 1)
+
+      // Assert
       expect(useSearchStore.getState().currentPage).toBe(1)
     })
 
     it('should ignore setCurrentPage when there are no results', () => {
+      // Arrange
       useSearchStore.setState({ results: [], currentPage: 1 })
+
+      // Act
       useSearchStore.getState().setCurrentPage(2)
+
+      // Assert
       expect(useSearchStore.getState().currentPage).toBe(1)
     })
   })
 
   describe('loadHistory', () => {
     it('should load history from the API', async () => {
+      // Act
       await useSearchStore.getState().loadHistory()
+
+      // Assert
       const state = useSearchStore.getState()
       expect(state.history).toHaveLength(2)
       expect(state.history[0].query).toBe('react')
@@ -207,19 +270,20 @@ describe('useSearchStore', () => {
     })
 
     it('should keep existing history when API fails', async () => {
-      // Load history first
+      // Arrange
       await useSearchStore.getState().loadHistory()
       expect(useSearchStore.getState().history).toHaveLength(2)
 
-      // Make API fail
       server.use(
         http.get(`${API_BASE_URL}/search/history`, () => {
           return HttpResponse.error()
         }),
       )
 
-      // Try loading again — should fail silently and keep old data
+      // Act
       await useSearchStore.getState().loadHistory()
+
+      // Assert
       expect(useSearchStore.getState().history).toHaveLength(2)
     })
   })
