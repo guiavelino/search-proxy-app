@@ -1,4 +1,4 @@
-import type { PaginationViewProps } from './usePaginationContainer'
+import type { PaginationViewProps } from './usePagination'
 import './Pagination.scss'
 
 export function PaginationView({

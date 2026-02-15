@@ -1,4 +1,4 @@
-import { useSearchStore } from '@/features/search/store/search-store'
+import { useSearchStore } from '@/features/search/store/search.store'
 
 export function useSearch() {
   const query = useSearchStore((state) => state.query)

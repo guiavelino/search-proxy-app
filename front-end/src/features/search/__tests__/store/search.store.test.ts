@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw'
 import {
   useSearchStore,
   RESULTS_PER_PAGE,
-} from '@/features/search/store/search-store'
+} from '@/features/search/store/search.store'
 import { mockSearchResults } from '@/shared/test/mocks/handlers'
 import { server } from '@/shared/test/mocks/server'
 

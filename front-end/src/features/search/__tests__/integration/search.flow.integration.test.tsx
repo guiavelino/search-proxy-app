@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, waitFor, within } from '@/shared/test/render'
 import userEvent from '@testing-library/user-event'
 import { App } from '@/app/App'
-import { useSearchStore } from '@/features/search/store/search-store'
+import { useSearchStore } from '@/features/search/store/search.store'
 
 describe('Search Flow (Integration)', () => {
   beforeEach(() => {

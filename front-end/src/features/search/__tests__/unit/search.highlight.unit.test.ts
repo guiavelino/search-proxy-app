@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { highlightText } from '@/features/search/utils/highlight'
+import { highlightText } from '@/features/search/utils/search.highlight'
 
 describe('highlightText', () => {
   it('should return the full text as a single non-highlighted segment when query is empty', () => {

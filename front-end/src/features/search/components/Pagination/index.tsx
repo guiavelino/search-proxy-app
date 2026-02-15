@@ -1,8 +1,8 @@
 import { PaginationView } from './Pagination'
-import { usePaginationContainer } from './usePaginationContainer'
+import { usePagination } from './usePagination'
 
 export function Pagination() {
-  const props = usePaginationContainer()
+  const props = usePagination()
   return <PaginationView {...props} />
 }
 

@@ -1,4 +1,4 @@
-import { usePagination } from '@/features/search/hooks'
+import { usePagination as usePaginationState } from '@/features/search/hooks'
 
 export interface PaginationViewProps {
   isVisible: boolean
@@ -11,8 +11,9 @@ export interface PaginationViewProps {
   onNext: () => void
 }
 
-export function usePaginationContainer(): PaginationViewProps {
-  const { currentPage, setCurrentPage, totalPages, results } = usePagination()
+export function usePagination(): PaginationViewProps {
+  const { currentPage, setCurrentPage, totalPages, results } =
+    usePaginationState()
 
   const isVisible = results.length > 0 && totalPages > 1
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1)

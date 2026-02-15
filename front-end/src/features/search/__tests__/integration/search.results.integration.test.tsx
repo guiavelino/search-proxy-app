@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@/shared/test/render'
 import { ResultsList } from '@/features/search/components/ResultsList'
-import { useSearchStore } from '@/features/search/store/search-store'
+import { useSearchStore } from '@/features/search/store/search.store'
 import { mockSearchResults } from '@/shared/test/mocks/handlers'
 import { createSearchResult } from '@/shared/test/factories/search.factory'
 

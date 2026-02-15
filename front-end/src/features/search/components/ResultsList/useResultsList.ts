@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useSearch, usePagination } from '@/features/search/hooks'
-import { highlightText, type HighlightMatch } from '@/features/search/utils/highlight'
+import { highlightText, type HighlightMatch } from '@/features/search/utils/search.highlight'
 import type { SearchResult } from '@/features/search/model/search'
 
 export interface HighlightedResult {

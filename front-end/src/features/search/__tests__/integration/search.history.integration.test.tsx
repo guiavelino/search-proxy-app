@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@/shared/test/render'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { HistorySidebar } from '@/features/search/components/HistorySidebar'
-import { useSearchStore } from '@/features/search/store/search-store'
+import { useSearchStore } from '@/features/search/store/search.store'
 import { server } from '@/shared/test/mocks/server'
 
 describe('HistorySidebar (Integration)', () => {
