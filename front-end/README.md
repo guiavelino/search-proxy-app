@@ -28,6 +28,17 @@ The project follows a **feature-based architecture** with the **Container Hook p
 - **Custom render** — A shared `render()` function wraps components with all required providers, keeping tests clean.
 - **Race condition protection** — Stale search responses are discarded via a search ID counter.
 
+### Naming Conventions
+
+| Category | Convention | Example |
+|---|---|---|
+| React components | PascalCase | `SearchInput.tsx`, `ResultsList.tsx` |
+| Container hooks | camelCase with `use` prefix | `useSearchInput.ts`, `usePagination.ts` |
+| Domain hooks | kebab-case with `use-` prefix | `use-search.ts`, `use-pagination.ts` |
+| Everything else | dot notation with domain prefix | `search.store.ts`, `search.service.ts`, `search.highlight.ts` |
+| Tests | dot notation with intent suffix | `search.store.test.ts`, `search.input.integration.test.tsx` |
+| SCSS partials | underscore prefix | `_variables.scss`, `_mixins.scss` |
+
 ## Project Structure
 
 ```
@@ -51,7 +62,7 @@ src/
 │       │   │   └── index.tsx
 │       │   ├── Pagination/
 │       │   │   ├── Pagination.tsx
-│       │   │   ├── usePaginationContainer.ts
+│       │   │   ├── usePagination.ts
 │       │   │   ├── Pagination.scss
 │       │   │   └── index.tsx
 │       │   └── HistorySidebar/
@@ -65,13 +76,13 @@ src/
 │       │   ├── use-search-history.ts
 │       │   └── index.ts
 │       ├── store/
-│       │   └── search-store.ts       # Zustand store with race condition protection
+│       │   └── search.store.ts       # Zustand store with race condition protection
 │       ├── services/
 │       │   └── search.service.ts     # Domain service (executeSearch, getHistory)
 │       ├── model/
 │       │   └── search.ts             # TypeScript interfaces
 │       ├── utils/
-│       │   └── highlight.ts          # Text highlight + match counting
+│       │   └── search.highlight.ts   # Text highlight + match counting
 │       └── __tests__/
 │           ├── unit/                 # Pure logic tests
 │           │   └── search.highlight.unit.test.ts
