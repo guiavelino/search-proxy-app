@@ -20,6 +20,9 @@ interface SearchState {
   getPaginatedResults: () => SearchResult[]
 }
 
+// Tracks the latest search request to discard stale responses
+let activeSearchId = 0
+
 export const useSearchStore = create<SearchState>((set, get) => ({
   query: '',
   results: [],
@@ -33,15 +36,22 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   search: async (query: string) => {
     if (!query.trim()) return
 
+    const searchId = ++activeSearchId
     set({ isLoading: true, error: null, query, currentPage: 1 })
 
     try {
       const results = await searchService.executeSearch(query)
+
+      // Discard if a newer search was triggered while this one was in-flight
+      if (searchId !== activeSearchId) return
+
       set({ results, isLoading: false })
 
-      // Reload history after a search (backend saves it)
+      // Reload history after a search (backend saves it) — fire-and-forget
       get().loadHistory()
     } catch {
+      if (searchId !== activeSearchId) return
+
       set({
         error: 'Failed to fetch search results. Please try again.',
         isLoading: false,
@@ -50,7 +60,11 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     }
   },
 
-  setCurrentPage: (page: number) => set({ currentPage: page }),
+  setCurrentPage: (page: number) => {
+    const totalPages = get().getTotalPages()
+    if (page < 1 || page > totalPages || totalPages === 0) return
+    set({ currentPage: page })
+  },
 
   loadHistory: async () => {
     try {

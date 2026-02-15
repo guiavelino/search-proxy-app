@@ -18,7 +18,7 @@ export function App() {
         <section className="app__search">
           <SearchInput />
         </section>
-        <section className="app__results">
+        <section className="app__results" aria-live="polite">
           <ResultsList />
           <Pagination />
         </section>

@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useSearch, usePagination } from '@/features/search/hooks'
 import { highlightText, type HighlightMatch } from '@/features/search/utils/highlight'
 import type { SearchResult } from '@/features/search/model/search'
@@ -5,6 +6,7 @@ import type { SearchResult } from '@/features/search/model/search'
 export interface HighlightedResult {
   result: SearchResult
   segments: HighlightMatch[]
+  matchCount: number
 }
 
 export interface ResultsListViewProps {
@@ -21,17 +23,25 @@ export function useResultsList(): ResultsListViewProps {
   const { getPaginatedResults } = usePagination()
   const paginatedResults = getPaginatedResults()
 
-  const highlightedResults: HighlightedResult[] = paginatedResults.map(
-    (result) => {
-      const { segments } = highlightText(result.title, query)
-      return { result, segments }
-    },
-  )
+  const { highlightedResults, totalMatchCount } = useMemo(() => {
+    const accumulated = paginatedResults.reduce<{
+      items: HighlightedResult[]
+      count: number
+    }>(
+      (acc, result) => {
+        const { segments, matchCount } = highlightText(result.title, query)
+        acc.items.push({ result, segments, matchCount })
+        acc.count += matchCount
+        return acc
+      },
+      { items: [], count: 0 },
+    )
 
-  const totalMatchCount = highlightedResults.reduce((count, { result }) => {
-    const { matchCount } = highlightText(result.title, query)
-    return count + matchCount
-  }, 0)
+    return {
+      highlightedResults: accumulated.items,
+      totalMatchCount: accumulated.count,
+    }
+  }, [paginatedResults, query])
 
   return {
     query,
