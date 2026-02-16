@@ -1,0 +1,26 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - server-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  server-data:
