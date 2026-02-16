@@ -12,7 +12,7 @@ describe('DuckDuckGoProvider', () => {
     jest.clearAllMocks();
   });
 
-  it('should call the DuckDuckGo API with correct parameters', async () => {
+  it('should call the DuckDuckGo API with correct parameters and timeout', async () => {
     // Arrange
     mockedAxios.get.mockResolvedValue({
       data: { RelatedTopics: [], Results: [] },
@@ -24,7 +24,7 @@ describe('DuckDuckGoProvider', () => {
     // Assert
     expect(mockedAxios.get).toHaveBeenCalledWith(
       'https://api.duckduckgo.com/',
-      { params: { q: 'react', format: 'json', no_html: 1 } },
+      { params: { q: 'react', format: 'json', no_html: 1 }, timeout: 10_000 },
     );
   });
 
@@ -66,11 +66,17 @@ describe('DuckDuckGoProvider', () => {
     mockedAxios.get.mockResolvedValue({
       data: {
         RelatedTopics: [
-          { Text: 'Direct - A direct result', FirstURL: 'https://example.com/direct' },
+          {
+            Text: 'Direct - A direct result',
+            FirstURL: 'https://example.com/direct',
+          },
           {
             Name: 'Group',
             Topics: [
-              { Text: 'Nested - A nested result', FirstURL: 'https://example.com/nested' },
+              {
+                Text: 'Nested - A nested result',
+                FirstURL: 'https://example.com/nested',
+              },
             ],
           },
         ],
@@ -113,7 +119,10 @@ describe('DuckDuckGoProvider', () => {
     mockedAxios.get.mockResolvedValue({
       data: {
         RelatedTopics: [
-          { Text: 'Simple topic without dash', FirstURL: 'https://example.com' },
+          {
+            Text: 'Simple topic without dash',
+            FirstURL: 'https://example.com',
+          },
         ],
         Results: [],
       },
@@ -145,7 +154,10 @@ describe('DuckDuckGoProvider', () => {
       data: {
         RelatedTopics: [],
         Results: [
-          { Text: 'Official Site - The official website', FirstURL: 'https://official.com' },
+          {
+            Text: 'Official Site - The official website',
+            FirstURL: 'https://official.com',
+          },
         ],
       },
     });
@@ -156,5 +168,25 @@ describe('DuckDuckGoProvider', () => {
     // Assert
     expect(results).toHaveLength(1);
     expect(results[0].url).toBe('https://official.com');
+  });
+
+  it('should throw a wrapped error when the API call fails', async () => {
+    // Arrange
+    mockedAxios.get.mockRejectedValue(new Error('Network Error'));
+
+    // Act & Assert
+    await expect(provider.search('fail')).rejects.toThrow(
+      'Search provider failed for query "fail"',
+    );
+  });
+
+  it('should throw a wrapped error on timeout', async () => {
+    // Arrange
+    mockedAxios.get.mockRejectedValue(new Error('timeout of 10000ms exceeded'));
+
+    // Act & Assert
+    await expect(provider.search('slow')).rejects.toThrow(
+      'Search provider failed for query "slow"',
+    );
   });
 });

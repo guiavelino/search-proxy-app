@@ -1,18 +1,18 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
-import { SearchQueryDto, SearchBodyDto } from './search.dto';
+import { SearchDto } from './search.dto';
 
 @Controller('search')
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @Get()
-  async searchByQuery(@Query() dto: SearchQueryDto) {
+  async searchByQuery(@Query() dto: SearchDto) {
     return this.searchService.search(dto.q);
   }
 
   @Post()
-  async searchByBody(@Body() dto: SearchBodyDto) {
+  async searchByBody(@Body() dto: SearchDto) {
     return this.searchService.search(dto.q);
   }
 

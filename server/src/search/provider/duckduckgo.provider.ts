@@ -1,32 +1,38 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import type { SearchResult } from '../search.types';
 import type { SearchProvider } from './search-provider.interface';
+import type {
+  DuckDuckGoResponse,
+  DuckDuckGoTopic,
+  DuckDuckGoTopicGroup,
+} from './duckduckgo.types';
 
-interface DuckDuckGoTopic {
-  Text?: string;
-  FirstURL?: string;
-}
-
-interface DuckDuckGoTopicGroup {
-  Name: string;
-  Topics: DuckDuckGoTopic[];
-}
-
-interface DuckDuckGoResponse {
-  RelatedTopics: (DuckDuckGoTopic | DuckDuckGoTopicGroup)[];
-  Results: DuckDuckGoTopic[];
-}
+const REQUEST_TIMEOUT_MS = 10_000;
 
 @Injectable()
 export class DuckDuckGoProvider implements SearchProvider {
+  private readonly logger = new Logger(DuckDuckGoProvider.name);
   private readonly baseUrl = 'https://api.duckduckgo.com/';
 
   async search(query: string): Promise<SearchResult[]> {
-    const { data } = await axios.get<DuckDuckGoResponse>(this.baseUrl, {
-      params: { q: query, format: 'json', no_html: 1 },
-    });
+    try {
+      const { data } = await axios.get<DuckDuckGoResponse>(this.baseUrl, {
+        params: { q: query, format: 'json', no_html: 1 },
+        timeout: REQUEST_TIMEOUT_MS,
+      });
 
+      return this.parseResponse(data);
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch results for "${query}"`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw new Error(`Search provider failed for query "${query}"`);
+    }
+  }
+
+  private parseResponse(data: DuckDuckGoResponse): SearchResult[] {
     const topics = this.flattenTopics(data.RelatedTopics ?? []);
     const all = [...(data.Results ?? []), ...topics];
 

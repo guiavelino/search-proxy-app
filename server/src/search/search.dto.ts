@@ -1,15 +1,9 @@
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { MAX_QUERY_LENGTH } from './search.types';
 
-export class SearchQueryDto {
+export class SearchDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(200)
-  q: string;
-}
-
-export class SearchBodyDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(200)
-  q: string;
+  @MaxLength(MAX_QUERY_LENGTH)
+  q!: string;
 }

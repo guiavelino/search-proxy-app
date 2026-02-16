@@ -44,6 +44,7 @@ exports.FileHistoryService = void 0;
 const common_1 = require("@nestjs/common");
 const fs = __importStar(require("fs/promises"));
 const path = __importStar(require("path"));
+const search_types_1 = require("../search.types");
 let FileHistoryService = FileHistoryService_1 = class FileHistoryService {
     logger = new common_1.Logger(FileHistoryService_1.name);
     filePath = path.resolve(process.cwd(), 'data', 'history.json');
@@ -53,6 +54,9 @@ let FileHistoryService = FileHistoryService_1 = class FileHistoryService {
     }
     async save(query) {
         this.entries.push({ query, timestamp: new Date().toISOString() });
+        if (this.entries.length > search_types_1.MAX_HISTORY_ENTRIES) {
+            this.entries = this.entries.slice(-search_types_1.MAX_HISTORY_ENTRIES);
+        }
         await this.persist();
     }
     async findAll() {
@@ -64,7 +68,7 @@ let FileHistoryService = FileHistoryService_1 = class FileHistoryService {
             const content = await fs.readFile(this.filePath, 'utf-8');
             const raw = JSON.parse(content);
             if (Array.isArray(raw)) {
-                this.entries = raw;
+                this.entries = raw.slice(-search_types_1.MAX_HISTORY_ENTRIES);
                 this.logger.log(`Loaded ${this.entries.length} history entries`);
             }
         }
@@ -74,7 +78,6 @@ let FileHistoryService = FileHistoryService_1 = class FileHistoryService {
         }
     }
     async persist() {
-        await fs.mkdir(path.dirname(this.filePath), { recursive: true });
         await fs.writeFile(this.filePath, JSON.stringify(this.entries, null, 2));
     }
 };

@@ -9,26 +9,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SearchBodyDto = exports.SearchQueryDto = void 0;
+exports.SearchDto = void 0;
 const class_validator_1 = require("class-validator");
-class SearchQueryDto {
+const search_types_1 = require("./search.types");
+class SearchDto {
     q;
 }
-exports.SearchQueryDto = SearchQueryDto;
+exports.SearchDto = SearchDto;
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.MaxLength)(200),
+    (0, class_validator_1.MaxLength)(search_types_1.MAX_QUERY_LENGTH),
     __metadata("design:type", String)
-], SearchQueryDto.prototype, "q", void 0);
-class SearchBodyDto {
-    q;
-}
-exports.SearchBodyDto = SearchBodyDto;
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.MaxLength)(200),
-    __metadata("design:type", String)
-], SearchBodyDto.prototype, "q", void 0);
+], SearchDto.prototype, "q", void 0);
 //# sourceMappingURL=search.dto.js.map

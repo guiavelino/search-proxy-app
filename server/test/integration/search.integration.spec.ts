@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import supertest from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { SEARCH_PROVIDER } from '../../src/search/provider/search-provider.interface';
 import type { SearchProvider } from '../../src/search/provider/search-provider.interface';
 import { FileHistoryService } from '../../src/search/history/file-history.service';
+import { validationPipeConfig } from '../../src/search/search.config';
 
 describe('SearchController (integration)', () => {
   let app: INestApplication;
@@ -38,13 +39,7 @@ describe('SearchController (integration)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
-    );
+    app.useGlobalPipes(validationPipeConfig());
     await app.init();
   });
 

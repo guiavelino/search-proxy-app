@@ -1,6 +1,3 @@
-export declare class SearchQueryDto {
-    q: string;
-}
-export declare class SearchBodyDto {
+export declare class SearchDto {
     q: string;
 }

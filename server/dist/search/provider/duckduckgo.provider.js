@@ -8,16 +8,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var DuckDuckGoProvider_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DuckDuckGoProvider = void 0;
 const common_1 = require("@nestjs/common");
 const axios_1 = __importDefault(require("axios"));
-let DuckDuckGoProvider = class DuckDuckGoProvider {
+const REQUEST_TIMEOUT_MS = 10_000;
+let DuckDuckGoProvider = DuckDuckGoProvider_1 = class DuckDuckGoProvider {
+    logger = new common_1.Logger(DuckDuckGoProvider_1.name);
     baseUrl = 'https://api.duckduckgo.com/';
     async search(query) {
-        const { data } = await axios_1.default.get(this.baseUrl, {
-            params: { q: query, format: 'json', no_html: 1 },
-        });
+        try {
+            const { data } = await axios_1.default.get(this.baseUrl, {
+                params: { q: query, format: 'json', no_html: 1 },
+                timeout: REQUEST_TIMEOUT_MS,
+            });
+            return this.parseResponse(data);
+        }
+        catch (error) {
+            this.logger.error(`Failed to fetch results for "${query}"`, error instanceof Error ? error.message : String(error));
+            throw new Error(`Search provider failed for query "${query}"`);
+        }
+    }
+    parseResponse(data) {
         const topics = this.flattenTopics(data.RelatedTopics ?? []);
         const all = [...(data.Results ?? []), ...topics];
         return all
@@ -36,7 +49,7 @@ let DuckDuckGoProvider = class DuckDuckGoProvider {
     }
 };
 exports.DuckDuckGoProvider = DuckDuckGoProvider;
-exports.DuckDuckGoProvider = DuckDuckGoProvider = __decorate([
+exports.DuckDuckGoProvider = DuckDuckGoProvider = DuckDuckGoProvider_1 = __decorate([
     (0, common_1.Injectable)()
 ], DuckDuckGoProvider);
 //# sourceMappingURL=duckduckgo.provider.js.map

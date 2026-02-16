@@ -5,7 +5,7 @@ Backend API built with **NestJS** that acts as a proxy for the DuckDuckGo Instan
 ## Tech Stack
 
 - **NestJS 11** — Framework
-- **TypeScript** — Language
+- **TypeScript (strict mode)** — Language
 - **Axios** — HTTP client for DuckDuckGo API
 - **class-validator / class-transformer** — DTO validation
 - **Jest / Supertest** — Unit & integration tests
@@ -21,10 +21,12 @@ src/
     provider/                        # Search provider abstraction + implementations
       search-provider.interface.ts   # Interface + DI token (Liskov)
       duckduckgo.provider.ts         # DuckDuckGo implementation
+      duckduckgo.types.ts            # DuckDuckGo API response types
     history/                         # File-based history persistence
       file-history.service.ts
-    search.types.ts                  # Domain types (SearchResult, HistoryEntry)
-    search.dto.ts                    # Request validation DTOs
+    search.types.ts                  # Domain types + constants
+    search.dto.ts                    # Request validation DTO
+    search.config.ts                 # Shared config (ValidationPipe)
     search.controller.ts             # HTTP endpoints
     search.service.ts                # Orchestration (provider + history)
     search.module.ts                 # Module wiring
@@ -35,12 +37,17 @@ src/
 ### Key Decisions
 
 - **Provider abstraction (Liskov)**: `SearchProvider` interface allows swapping DuckDuckGo for any other provider without changing the service or controller. New providers just implement the interface and get registered in the module.
-- **Centralized types**: `search.types.ts` holds domain types (`SearchResult`, `HistoryEntry`), mirroring the frontend's `model/search.ts` pattern.
+- **Centralized types**: `search.types.ts` holds domain types (`SearchResult`, `HistoryEntry`) and constants (`MAX_QUERY_LENGTH`, `MAX_HISTORY_ENTRIES`), mirroring the frontend's `model/search.ts` pattern.
 - **Single service layer**: Controller delegates everything to `SearchService` — no direct infrastructure access from the presentation layer.
+- **Unified DTO**: A single `SearchDto` is used for both GET and POST endpoints, eliminating duplication.
+- **Shared config**: `ValidationPipe` configuration is extracted to `search.config.ts`, shared between `main.ts` and integration tests.
+- **Error handling**: Provider wraps API errors with meaningful messages and logs them via NestJS Logger. Bootstrap has `.catch()` with graceful shutdown.
+- **HTTP timeout**: External API calls have a 10s timeout to prevent hanging requests.
+- **History cap**: History is limited to the last 100 entries to prevent unbounded file growth.
 - **File-based persistence**: History is stored as JSON in `data/history.json` and loaded automatically via `OnModuleInit`.
-- **Validation**: DTOs with `class-validator` decorators + global `ValidationPipe` with `whitelist` and `forbidNonWhitelisted`.
+- **Validation**: DTO with `class-validator` decorators + global `ValidationPipe` with `whitelist` and `forbidNonWhitelisted`.
+- **Strict TypeScript**: `strict: true` for maximum type safety.
 - **CORS enabled**: Ready for cross-origin requests from the frontend.
-- **Consistent naming**: Follows the same dot-separated convention as the frontend (`search.service.ts`, `search.types.ts`, `search.dto.ts`).
 
 ## API Endpoints
 
@@ -69,14 +76,14 @@ npm run start:prod
 ## Tests
 
 ```bash
-# Unit tests (20 tests)
+# Unit tests (24 tests)
 npm test
 
 # Integration tests (7 tests)
 npm run test:integration
 ```
 
-**Total: 27 tests** covering service logic, provider parsing, file persistence, and full HTTP endpoint flows.
+**Total: 31 tests** covering service logic, provider parsing (including error handling and timeout), file persistence (including history cap), and full HTTP endpoint flows.
 
 ## Docker
 
@@ -84,6 +91,8 @@ npm run test:integration
 # From project root
 docker compose up --build
 ```
+
+The production Docker image uses a dedicated stage for production-only dependencies (`npm ci --omit=dev`), keeping the image lean.
 
 The server runs on port **3000** by default (configurable via `PORT` env var).
 
