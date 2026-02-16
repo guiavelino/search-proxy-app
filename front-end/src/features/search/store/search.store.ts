@@ -1,17 +1,20 @@
 import { create } from 'zustand'
 import type { SearchResult, HistoryEntry } from '@/features/search/model/search'
+import { RESULTS_PER_PAGE } from '@/features/search/model/search'
 import { searchService } from '@/features/search/services/search.service'
 
-const RESULTS_PER_PAGE = 5
-
-interface SearchState {
+interface SearchData {
   query: string
   results: SearchResult[]
   history: HistoryEntry[]
   currentPage: number
   isLoading: boolean
+  isHistoryLoading: boolean
+  hasSearched: boolean
   error: string | null
+}
 
+interface SearchActions {
   setQuery: (query: string) => void
   search: (query: string) => Promise<void>
   setCurrentPage: (page: number) => void
@@ -20,8 +23,19 @@ interface SearchState {
   getPaginatedResults: () => SearchResult[]
 }
 
-// Tracks the latest search request to discard stale responses
-let activeSearchId = 0
+type SearchState = SearchData & SearchActions
+
+// Internal mutable state — not reactive, no re-renders needed
+const searchInternals = {
+  activeSearchId: 0,
+  activeSearchController: null as AbortController | null,
+}
+
+export function resetSearchInternals() {
+  searchInternals.activeSearchController?.abort()
+  searchInternals.activeSearchId = 0
+  searchInternals.activeSearchController = null
+}
 
 export const useSearchStore = create<SearchState>((set, get) => ({
   query: '',
@@ -29,6 +43,8 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   history: [],
   currentPage: 1,
   isLoading: false,
+  isHistoryLoading: false,
+  hasSearched: false,
   error: null,
 
   setQuery: (query: string) => set({ query }),
@@ -36,21 +52,26 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   search: async (query: string) => {
     if (!query.trim()) return
 
-    const searchId = ++activeSearchId
-    set({ isLoading: true, error: null, query, currentPage: 1 })
+    // Cancel any in-flight request before starting a new one
+    searchInternals.activeSearchController?.abort()
+    const controller = new AbortController()
+    searchInternals.activeSearchController = controller
+
+    const searchId = ++searchInternals.activeSearchId
+    set({ isLoading: true, error: null, query, currentPage: 1, hasSearched: true })
 
     try {
-      const results = await searchService.executeSearch(query)
+      const results = await searchService.executeSearch(query, controller.signal)
 
       // Discard if a newer search was triggered while this one was in-flight
-      if (searchId !== activeSearchId) return
+      if (searchId !== searchInternals.activeSearchId) return
 
       set({ results, isLoading: false })
 
       // Reload history after a search (backend saves it) — fire-and-forget
       get().loadHistory()
     } catch {
-      if (searchId !== activeSearchId) return
+      if (searchId !== searchInternals.activeSearchId) return
 
       set({
         error: 'Failed to fetch search results. Please try again.',
@@ -67,11 +88,13 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   },
 
   loadHistory: async () => {
+    set({ isHistoryLoading: true })
     try {
       const history = await searchService.getHistory()
-      set({ history })
+      set({ history, isHistoryLoading: false })
     } catch {
-      // Silently fail — history is non-critical
+      // Keep existing history on failure — non-critical data
+      set({ isHistoryLoading: false })
     }
   },
 
@@ -86,5 +109,3 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     return results.slice(start, start + RESULTS_PER_PAGE)
   },
 }))
-
-export { RESULTS_PER_PAGE }

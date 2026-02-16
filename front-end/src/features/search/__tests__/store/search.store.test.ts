@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import {
   useSearchStore,
-  RESULTS_PER_PAGE,
+  resetSearchInternals,
 } from '@/features/search/store/search.store'
+import { RESULTS_PER_PAGE } from '@/features/search/model/search'
 import { mockSearchResults } from '@/shared/test/mocks/handlers'
 import { server } from '@/shared/test/mocks/server'
 
@@ -11,12 +12,15 @@ const API_BASE_URL = 'http://localhost:3000'
 
 describe('useSearchStore', () => {
   beforeEach(() => {
+    resetSearchInternals()
     useSearchStore.setState({
       query: '',
       results: [],
       history: [],
       currentPage: 1,
       isLoading: false,
+      isHistoryLoading: false,
+      hasSearched: false,
       error: null,
     })
   })
@@ -32,6 +36,8 @@ describe('useSearchStore', () => {
       expect(state.history).toEqual([])
       expect(state.currentPage).toBe(1)
       expect(state.isLoading).toBe(false)
+      expect(state.isHistoryLoading).toBe(false)
+      expect(state.hasSearched).toBe(false)
       expect(state.error).toBeNull()
     })
   })
@@ -73,7 +79,19 @@ describe('useSearchStore', () => {
       expect(state.results).toEqual(mockSearchResults)
       expect(state.query).toBe('react')
       expect(state.isLoading).toBe(false)
+      expect(state.hasSearched).toBe(true)
       expect(state.error).toBeNull()
+    })
+
+    it('should set hasSearched to true on search', async () => {
+      // Arrange
+      expect(useSearchStore.getState().hasSearched).toBe(false)
+
+      // Act
+      await useSearchStore.getState().search('react')
+
+      // Assert
+      expect(useSearchStore.getState().hasSearched).toBe(true)
     })
 
     it('should reset currentPage to 1 on new search', async () => {
@@ -267,6 +285,28 @@ describe('useSearchStore', () => {
       expect(state.history).toHaveLength(2)
       expect(state.history[0].query).toBe('react')
       expect(state.history[1].query).toBe('typescript')
+      expect(state.isHistoryLoading).toBe(false)
+    })
+
+    it('should set isHistoryLoading during fetch', async () => {
+      // Arrange
+      server.use(
+        http.get(`${API_BASE_URL}/search/history`, async () => {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          return HttpResponse.json([])
+        }),
+      )
+
+      // Act
+      const promise = useSearchStore.getState().loadHistory()
+
+      // Assert — loading is true while request is in-flight
+      expect(useSearchStore.getState().isHistoryLoading).toBe(true)
+
+      await promise
+
+      // Assert — loading is false after request completes
+      expect(useSearchStore.getState().isHistoryLoading).toBe(false)
     })
 
     it('should keep existing history when API fails', async () => {
@@ -285,6 +325,7 @@ describe('useSearchStore', () => {
 
       // Assert
       expect(useSearchStore.getState().history).toHaveLength(2)
+      expect(useSearchStore.getState().isHistoryLoading).toBe(false)
     })
   })
 })

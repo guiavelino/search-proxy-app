@@ -13,16 +13,36 @@ describe('ResultsList (Integration)', () => {
       history: [],
       currentPage: 1,
       isLoading: false,
+      isHistoryLoading: false,
+      hasSearched: false,
       error: null,
     })
   })
 
-  it('should render nothing when there are no results', () => {
+  it('should render nothing when no search has been performed', () => {
     // Act
     const { container } = render(<ResultsList />)
 
     // Assert
     expect(container.firstChild).toBeNull()
+  })
+
+  it('should show "no results found" when search returns empty', () => {
+    // Arrange
+    useSearchStore.setState({
+      query: 'nonexistent',
+      results: [],
+      hasSearched: true,
+      isLoading: false,
+    })
+
+    // Act
+    render(<ResultsList />)
+
+    // Assert
+    const emptyState = screen.getByRole('status')
+    expect(emptyState).toHaveTextContent('No results found for')
+    expect(emptyState).toHaveTextContent('nonexistent')
   })
 
   it('should show loading state', () => {
@@ -52,6 +72,7 @@ describe('ResultsList (Integration)', () => {
     useSearchStore.setState({
       results: mockSearchResults,
       query: 'react',
+      hasSearched: true,
     })
 
     // Act
@@ -66,6 +87,7 @@ describe('ResultsList (Integration)', () => {
     useSearchStore.setState({
       results: mockSearchResults,
       query: 'something',
+      hasSearched: true,
       currentPage: 1,
     })
 
@@ -82,6 +104,7 @@ describe('ResultsList (Integration)', () => {
     useSearchStore.setState({
       results: [createSearchResult({ title: 'React Tutorial', url: 'https://example.com' })],
       query: 'React',
+      hasSearched: true,
     })
 
     // Act
@@ -98,6 +121,7 @@ describe('ResultsList (Integration)', () => {
     useSearchStore.setState({
       results: mockSearchResults,
       query: 'React',
+      hasSearched: true,
     })
 
     // Act
@@ -114,6 +138,7 @@ describe('ResultsList (Integration)', () => {
     useSearchStore.setState({
       results: [createSearchResult({ title: 'Test Result', url: 'https://example.com' })],
       query: 'test',
+      hasSearched: true,
     })
 
     // Act

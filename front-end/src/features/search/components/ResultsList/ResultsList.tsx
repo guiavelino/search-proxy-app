@@ -1,9 +1,12 @@
+import { memo } from 'react'
 import type { ResultsListViewProps } from './useResultsList'
 import './ResultsList.scss'
 
-export function ResultsListView({
+export const ResultsListView = memo(function ResultsListView({
+  query,
   isLoading,
   error,
+  hasSearched,
   totalResults,
   highlightedResults,
   totalMatchCount,
@@ -26,6 +29,13 @@ export function ResultsListView({
   }
 
   if (totalResults === 0) {
+    if (hasSearched) {
+      return (
+        <div className="results-list__empty" role="status">
+          <p>No results found for &ldquo;{query}&rdquo;</p>
+        </div>
+      )
+    }
     return null
   }
 
@@ -68,4 +78,4 @@ export function ResultsListView({
       </ul>
     </div>
   )
-}
+})

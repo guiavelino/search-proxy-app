@@ -1,10 +1,12 @@
+import { memo } from 'react'
 import type { SearchInputViewProps } from './useSearchInput'
 import './SearchInput.scss'
 
-export function SearchInputView({
+export const SearchInputView = memo(function SearchInputView({
   inputValue,
   isLoading,
   isSubmitDisabled,
+  maxQueryLength,
   onInputChange,
   onSubmit,
 }: SearchInputViewProps) {
@@ -19,6 +21,7 @@ export function SearchInputView({
           onChange={(e) => onInputChange(e.target.value)}
           aria-label="Search query"
           disabled={isLoading}
+          maxLength={maxQueryLength}
         />
         <button
           type="submit"
@@ -35,4 +38,4 @@ export function SearchInputView({
       </div>
     </form>
   )
-}
+})

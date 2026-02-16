@@ -12,6 +12,8 @@ describe('Search Flow (Integration)', () => {
       history: [],
       currentPage: 1,
       isLoading: false,
+      isHistoryLoading: false,
+      hasSearched: false,
       error: null,
     })
   })

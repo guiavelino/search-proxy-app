@@ -3,6 +3,7 @@ import { render, screen } from '@/shared/test/render'
 import userEvent from '@testing-library/user-event'
 import { SearchInput } from '@/features/search/components/SearchInput'
 import { useSearchStore } from '@/features/search/store/search.store'
+import { MAX_QUERY_LENGTH } from '@/features/search/model/search'
 
 describe('SearchInput (Integration)', () => {
   beforeEach(() => {
@@ -12,6 +13,8 @@ describe('SearchInput (Integration)', () => {
       history: [],
       currentPage: 1,
       isLoading: false,
+      isHistoryLoading: false,
+      hasSearched: false,
       error: null,
     })
   })
@@ -103,5 +106,14 @@ describe('SearchInput (Integration)', () => {
 
     // Assert
     expect(screen.getByLabelText('Search query')).toBeDisabled()
+  })
+
+  it('should have maxLength attribute on the input', () => {
+    // Act
+    render(<SearchInput />)
+
+    // Assert
+    const input = screen.getByLabelText('Search query')
+    expect(input).toHaveAttribute('maxLength', String(MAX_QUERY_LENGTH))
   })
 })

@@ -14,6 +14,8 @@ describe('HistorySidebar (Integration)', () => {
       history: [],
       currentPage: 1,
       isLoading: false,
+      isHistoryLoading: false,
+      hasSearched: false,
       error: null,
     })
   })
@@ -89,5 +91,17 @@ describe('HistorySidebar (Integration)', () => {
 
     // Assert
     expect(screen.getByLabelText('Search history')).toBeInTheDocument()
+  })
+
+  it('should show loading state when history is being fetched', () => {
+    // Arrange — pre-set loading state to test the view directly
+    useSearchStore.setState({ isHistoryLoading: true, history: [] })
+
+    // Act
+    render(<HistorySidebar />)
+
+    // Assert
+    expect(screen.getByText('Loading history...')).toBeInTheDocument()
+    expect(screen.queryByText('No search history yet.')).not.toBeInTheDocument()
   })
 })

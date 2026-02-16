@@ -7,3 +7,6 @@ export interface HistoryEntry {
   query: string
   timestamp: string
 }
+
+export const MAX_QUERY_LENGTH = 200
+export const RESULTS_PER_PAGE = 5

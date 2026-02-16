@@ -13,15 +13,15 @@ export interface ResultsListViewProps {
   query: string
   isLoading: boolean
   error: string | null
+  hasSearched: boolean
   totalResults: number
   highlightedResults: HighlightedResult[]
   totalMatchCount: number
 }
 
 export function useResultsList(): ResultsListViewProps {
-  const { query, isLoading, error, results } = useSearch()
-  const { getPaginatedResults } = usePagination()
-  const paginatedResults = getPaginatedResults()
+  const { query, isLoading, error, results, hasSearched } = useSearch()
+  const { paginatedResults } = usePagination()
 
   const { highlightedResults, totalMatchCount } = useMemo(() => {
     const accumulated = paginatedResults.reduce<{
@@ -47,6 +47,7 @@ export function useResultsList(): ResultsListViewProps {
     query,
     isLoading,
     error,
+    hasSearched,
     totalResults: results.length,
     highlightedResults,
     totalMatchCount,

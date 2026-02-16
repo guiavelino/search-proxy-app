@@ -1,7 +1,8 @@
+import { memo } from 'react'
 import type { PaginationViewProps } from './usePagination'
 import './Pagination.scss'
 
-export function PaginationView({
+export const PaginationView = memo(function PaginationView({
   isVisible,
   currentPage,
   pages,
@@ -52,4 +53,4 @@ export function PaginationView({
       </button>
     </nav>
   )
-}
+})

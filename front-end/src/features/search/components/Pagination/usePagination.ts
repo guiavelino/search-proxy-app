@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react'
 import { usePagination as usePaginationState } from '@/features/search/hooks'
 
 export interface PaginationViewProps {
@@ -16,7 +17,26 @@ export function usePagination(): PaginationViewProps {
     usePaginationState()
 
   const isVisible = results.length > 0 && totalPages > 1
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
+
+  const pages = useMemo(
+    () => Array.from({ length: totalPages }, (_, i) => i + 1),
+    [totalPages],
+  )
+
+  const onPageChange = useCallback(
+    (page: number) => setCurrentPage(page),
+    [setCurrentPage],
+  )
+
+  const onPrevious = useCallback(
+    () => setCurrentPage(currentPage - 1),
+    [currentPage, setCurrentPage],
+  )
+
+  const onNext = useCallback(
+    () => setCurrentPage(currentPage + 1),
+    [currentPage, setCurrentPage],
+  )
 
   return {
     isVisible,
@@ -24,8 +44,8 @@ export function usePagination(): PaginationViewProps {
     pages,
     isPreviousDisabled: currentPage === 1,
     isNextDisabled: currentPage === totalPages,
-    onPageChange: setCurrentPage,
-    onPrevious: () => setCurrentPage(currentPage - 1),
-    onNext: () => setCurrentPage(currentPage + 1),
+    onPageChange,
+    onPrevious,
+    onNext,
   }
 }

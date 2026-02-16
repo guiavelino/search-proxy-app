@@ -7,6 +7,7 @@ export function useSearch() {
   const isLoading = useSearchStore((state) => state.isLoading)
   const error = useSearchStore((state) => state.error)
   const results = useSearchStore((state) => state.results)
+  const hasSearched = useSearchStore((state) => state.hasSearched)
 
-  return { query, setQuery, search, isLoading, error, results }
+  return { query, setQuery, search, isLoading, error, results, hasSearched }
 }

@@ -29,6 +29,13 @@
     padding: 24px 0;
   }
 
+  &__loading {
+    font-size: 0.85rem;
+    color: $color-text-muted;
+    text-align: center;
+    padding: 24px 0;
+  }
+
   &__list {
     list-style: none;
     padding: 0;
