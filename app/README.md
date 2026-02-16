@@ -1,4 +1,4 @@
-# Search Proxy - Frontend
+# Search Proxy - App
 
 A React application that serves as the frontend for the Search Proxy platform. It provides a clean search interface powered by DuckDuckGo through a backend proxy API, with client-side pagination, search term highlighting, and search history.
 
@@ -8,7 +8,7 @@ A React application that serves as the frontend for the Search Proxy platform. I
 - **Vite** — fast build tool and dev server
 - **Zustand** — lightweight global state management
 - **SCSS** — styling with variables, nesting, and mixins
-- **Axios** — HTTP client for API communication
+- **Axios** — HTTP client with centralized interceptors
 - **Vitest** — unit and integration testing
 - **React Testing Library** — component testing with user-centric approach
 - **MSW (Mock Service Worker)** — API mocking for tests
@@ -22,11 +22,16 @@ The project follows a **feature-based architecture** with the **Container Hook p
 - **Feature-based structure** — All search-related code lives under `features/search/`, making it easy to find context and scale.
 - **Container Hook pattern** — Each component is split into a pure view (`ComponentName.tsx`) and a container hook (`useComponentName.ts`). The view receives everything via props and has zero logic. The hook handles state, handlers, and computed values.
 - **Three-layer hooks** — `Store → Domain Hooks → Container Hooks → Views`. Components never access the store directly.
-- **Domain-oriented service** — `searchService.executeSearch()` hides HTTP transport details (GET vs POST). The UI never knows how the API is called.
+- **Domain-oriented service** — `searchService.executeSearch()` hides HTTP transport details. The UI never knows how the API is called.
 - **Shared HTTP client** — Axios instance configured globally in `shared/lib/http/` with centralized interceptors for error handling.
+- **Separated state interface** — Zustand store types are split into `SearchData` (state) and `SearchActions` (behavior) for clarity.
+- **Request cancellation** — `AbortController` cancels in-flight HTTP requests when a newer search is triggered, combined with a search ID counter to discard stale responses.
+- **Performance-conscious memoization** — `React.memo` on pure views, `useCallback` on handlers, `useMemo` on derived data (`paginatedResults`, `highlightedResults`, `pages`). Local input state avoids global store updates on every keystroke.
+- **Domain constants in model** — `RESULTS_PER_PAGE` and `MAX_QUERY_LENGTH` live in `model/search.ts`, not in components or the store.
+- **Type-safe environment** — `vite-env.d.ts` types `import.meta.env` variables.
 - **Test factories** — Consistent test data creation via factory functions instead of hardcoded mock objects.
 - **Custom render** — A shared `render()` function wraps components with all required providers, keeping tests clean.
-- **Race condition protection** — Stale search responses are discarded via a search ID counter.
+- **Resettable store internals** — `searchInternals` (abort controller, search ID) are grouped and exposed via `resetSearchInternals()` for test isolation.
 
 ### Naming Conventions
 
@@ -51,8 +56,8 @@ src/
 │   └── search/                       # Search domain (core feature)
 │       ├── components/
 │       │   ├── SearchInput/
-│       │   │   ├── SearchInput.tsx    # Pure view
-│       │   │   ├── useSearchInput.ts  # Container hook
+│       │   │   ├── SearchInput.tsx    # Pure view (React.memo)
+│       │   │   ├── useSearchInput.ts  # Container hook (useCallback)
 │       │   │   ├── SearchInput.scss
 │       │   │   └── index.tsx          # Connects hook + view
 │       │   ├── ResultsList/
@@ -72,15 +77,15 @@ src/
 │       │       └── index.tsx
 │       ├── hooks/                    # Domain hooks (shared within feature)
 │       │   ├── use-search.ts
-│       │   ├── use-pagination.ts
+│       │   ├── use-pagination.ts     # Memoized paginatedResults
 │       │   ├── use-search-history.ts
 │       │   └── index.ts
 │       ├── store/
-│       │   └── search.store.ts       # Zustand store with race condition protection
+│       │   └── search.store.ts       # Zustand store (SearchData + SearchActions)
 │       ├── services/
-│       │   └── search.service.ts     # Domain service (executeSearch, getHistory)
+│       │   └── search.service.ts     # Domain service with AbortSignal support
 │       ├── model/
-│       │   └── search.ts             # TypeScript interfaces
+│       │   └── search.ts             # Types + domain constants
 │       ├── utils/
 │       │   └── search.highlight.ts   # Text highlight + match counting
 │       └── __tests__/
@@ -113,6 +118,7 @@ src/
 │       └── factories/
 │           └── search.factory.ts     # Test data factories
 │
+├── vite-env.d.ts                     # Typed environment variables
 ├── index.scss                        # Global styles
 └── main.tsx                          # Entry point with root guard
 ```
@@ -173,6 +179,8 @@ npm run lint
 
 ## Test Strategy
 
+Tests follow the **AAA pattern** (Arrange-Act-Assert) with explicit comments on complex tests.
+
 Tests are organized by **intent**, not by file location:
 
 | Category | What it tests | Example |
@@ -181,22 +189,28 @@ Tests are organized by **intent**, not by file location:
 | `integration/` | Component behavior with user interaction | type → search → see results |
 | `store/` | Zustand actions, state transitions, error handling | search with API failure, pagination bounds |
 
-**64 tests** across 7 test suites covering:
+**69 tests** across 7 test suites covering:
 - Happy paths and error scenarios
-- Race condition handling (stale response discard)
+- Race condition handling (AbortController + stale response discard)
 - Pagination bounds validation
 - Network failures and API errors
+- Empty state feedback ("no results found")
+- History loading states
+- Input validation (max query length)
 - Full user flows (search → results → paginate → history replay)
 
 ## Features
 
-- **Search Input** — Type a query and submit to search via the backend proxy
+- **Search Input** — Type a query and submit to search via the backend proxy, with max length validation
 - **Results List** — Displays search results with title and clickable URL
+- **Empty State** — Shows feedback when a search returns no results
 - **Highlight** — Matching search terms are highlighted in result titles
 - **Match Counter** — Shows total highlighted matches on the current page
-- **Client-Side Pagination** — Results are paginated in the frontend (5 per page) with bounds validation
-- **Search History Sidebar** — Shows previous searches; click to re-execute
+- **Client-Side Pagination** — Results are paginated (5 per page) with bounds validation
+- **Search History Sidebar** — Shows previous searches with loading state; click to re-execute
+- **Request Cancellation** — In-flight requests are aborted when a new search starts
 - **Accessible** — ARIA labels, roles, live regions for screen readers
+- **Consistent Dates** — `Intl.DateTimeFormat` for locale-stable date rendering
 
 ## API Endpoints Expected
 
