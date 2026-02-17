@@ -33,6 +33,18 @@ export class HistoryService implements HistoryRepository, OnModuleInit {
     return [...this.entries];
   }
 
+  async removeAt(index: number): Promise<void> {
+    if (index < 0 || index >= this.entries.length) return;
+
+    this.entries.splice(index, 1);
+    await this.persist();
+  }
+
+  async clear(): Promise<void> {
+    this.entries = [];
+    await this.persist();
+  }
+
   private async load(): Promise<void> {
     try {
       await fs.mkdir(path.dirname(this.filePath), { recursive: true });

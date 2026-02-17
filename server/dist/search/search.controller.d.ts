@@ -7,4 +7,6 @@ export declare class SearchController {
     searchByQuery(dto: SearchDto): Promise<SearchResult[]>;
     searchByBody(dto: SearchDto): Promise<SearchResult[]>;
     getHistory(): Promise<HistoryEntry[]>;
+    removeHistoryEntry(index: number): Promise<void>;
+    clearHistory(): Promise<void>;
 }

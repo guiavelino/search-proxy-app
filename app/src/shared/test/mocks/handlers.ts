@@ -44,4 +44,12 @@ export const handlers = [
   http.get(`${API_BASE_URL}/search/history`, () => {
     return HttpResponse.json(mockHistory)
   }),
+
+  http.delete(`${API_BASE_URL}/search/history/:index`, () => {
+    return new HttpResponse(null, { status: 200 })
+  }),
+
+  http.delete(`${API_BASE_URL}/search/history`, () => {
+    return new HttpResponse(null, { status: 200 })
+  }),
 ]

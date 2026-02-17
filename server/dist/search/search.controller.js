@@ -30,6 +30,12 @@ let SearchController = class SearchController {
     async getHistory() {
         return this.searchService.getHistory();
     }
+    async removeHistoryEntry(index) {
+        return this.searchService.removeHistoryEntry(index);
+    }
+    async clearHistory() {
+        return this.searchService.clearHistory();
+    }
 };
 exports.SearchController = SearchController;
 __decorate([
@@ -52,6 +58,19 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SearchController.prototype, "getHistory", null);
+__decorate([
+    (0, common_1.Delete)('history/:index'),
+    __param(0, (0, common_1.Param)('index', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], SearchController.prototype, "removeHistoryEntry", null);
+__decorate([
+    (0, common_1.Delete)('history'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SearchController.prototype, "clearHistory", null);
 exports.SearchController = SearchController = __decorate([
     (0, common_1.Controller)('search'),
     __metadata("design:paramtypes", [search_service_1.SearchService])

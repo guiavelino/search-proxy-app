@@ -14,4 +14,12 @@ export const searchService = {
     const { data } = await httpClient.get<HistoryEntry[]>('/search/history')
     return data
   },
+
+  async removeHistoryEntry(index: number): Promise<void> {
+    await httpClient.delete(`/search/history/${index}`)
+  },
+
+  async clearHistory(): Promise<void> {
+    await httpClient.delete('/search/history')
+  },
 }

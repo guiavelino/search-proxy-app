@@ -328,4 +328,76 @@ describe('useSearchStore', () => {
       expect(useSearchStore.getState().isHistoryLoading).toBe(false)
     })
   })
+
+  describe('removeHistoryEntry', () => {
+    it('should call the API and reload history after removing', async () => {
+      // Arrange
+      await useSearchStore.getState().loadHistory()
+      expect(useSearchStore.getState().history).toHaveLength(2)
+
+      server.use(
+        http.get(`${API_BASE_URL}/search/history`, () => {
+          return HttpResponse.json([
+            { query: 'typescript', timestamp: '2025-01-02T00:00:00.000Z' },
+          ])
+        }),
+      )
+
+      // Act
+      await useSearchStore.getState().removeHistoryEntry(0)
+
+      // Assert
+      const state = useSearchStore.getState()
+      expect(state.history).toHaveLength(1)
+      expect(state.history[0].query).toBe('typescript')
+    })
+
+    it('should keep history unchanged when API fails', async () => {
+      // Arrange
+      await useSearchStore.getState().loadHistory()
+
+      server.use(
+        http.delete(`${API_BASE_URL}/search/history/:index`, () => {
+          return HttpResponse.error()
+        }),
+      )
+
+      // Act
+      await useSearchStore.getState().removeHistoryEntry(0)
+
+      // Assert
+      expect(useSearchStore.getState().history).toHaveLength(2)
+    })
+  })
+
+  describe('clearHistory', () => {
+    it('should clear all history entries', async () => {
+      // Arrange
+      await useSearchStore.getState().loadHistory()
+      expect(useSearchStore.getState().history).toHaveLength(2)
+
+      // Act
+      await useSearchStore.getState().clearHistory()
+
+      // Assert
+      expect(useSearchStore.getState().history).toEqual([])
+    })
+
+    it('should keep history unchanged when API fails', async () => {
+      // Arrange
+      await useSearchStore.getState().loadHistory()
+
+      server.use(
+        http.delete(`${API_BASE_URL}/search/history`, () => {
+          return HttpResponse.error()
+        }),
+      )
+
+      // Act
+      await useSearchStore.getState().clearHistory()
+
+      // Assert
+      expect(useSearchStore.getState().history).toHaveLength(2)
+    })
+  })
 })

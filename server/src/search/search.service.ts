@@ -32,4 +32,12 @@ export class SearchService {
   async getHistory(): Promise<HistoryEntry[]> {
     return this.historyRepository.findAll();
   }
+
+  async removeHistoryEntry(index: number): Promise<void> {
+    return this.historyRepository.removeAt(index);
+  }
+
+  async clearHistory(): Promise<void> {
+    return this.historyRepository.clear();
+  }
 }

@@ -11,6 +11,7 @@ import { validationPipeConfig } from '../../src/app.config';
 describe('SearchController (integration)', () => {
   let app: INestApplication;
   let searchProvider: jest.Mocked<SearchProvider>;
+  let mockHistoryRepository: jest.Mocked<HistoryRepository>;
 
   const mockResults = [
     { title: 'React', url: 'https://reactjs.org' },
@@ -22,11 +23,13 @@ describe('SearchController (integration)', () => {
       search: jest.fn().mockResolvedValue(mockResults),
     };
 
-    const mockHistoryRepository: jest.Mocked<HistoryRepository> = {
+    mockHistoryRepository = {
       save: jest.fn().mockResolvedValue(undefined),
       findAll: jest.fn().mockResolvedValue([
         { query: 'react', timestamp: '2025-01-01T00:00:00.000Z' },
       ]),
+      removeAt: jest.fn().mockResolvedValue(undefined),
+      clear: jest.fn().mockResolvedValue(undefined),
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -121,6 +124,40 @@ describe('SearchController (integration)', () => {
         query: 'react',
         timestamp: '2025-01-01T00:00:00.000Z',
       });
+    });
+  });
+
+  describe('DELETE /search/history/:index', () => {
+    it('should remove a specific history entry', async () => {
+      // Act
+      const response = await supertest(app.getHttpServer()).delete(
+        '/search/history/0',
+      );
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(mockHistoryRepository.removeAt).toHaveBeenCalledWith(0);
+    });
+
+    it('should return 400 for non-numeric index', async () => {
+      // Act & Assert
+      const response = await supertest(app.getHttpServer()).delete(
+        '/search/history/abc',
+      );
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('DELETE /search/history', () => {
+    it('should clear all history', async () => {
+      // Act
+      const response = await supertest(app.getHttpServer()).delete(
+        '/search/history',
+      );
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(mockHistoryRepository.clear).toHaveBeenCalled();
     });
   });
 });

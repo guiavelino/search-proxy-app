@@ -9,7 +9,12 @@ describe('SearchService', () => {
 
   beforeEach(() => {
     searchProvider = { search: jest.fn() };
-    historyRepository = { save: jest.fn(), findAll: jest.fn() };
+    historyRepository = {
+      save: jest.fn(),
+      findAll: jest.fn(),
+      removeAt: jest.fn(),
+      clear: jest.fn(),
+    };
     service = new SearchService(searchProvider, historyRepository);
   });
 
@@ -106,6 +111,32 @@ describe('SearchService', () => {
       // Assert
       expect(result).toEqual(history);
       expect(historyRepository.findAll).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removeHistoryEntry', () => {
+    it('should delegate to the history repository with the given index', async () => {
+      // Arrange
+      historyRepository.removeAt.mockResolvedValue(undefined);
+
+      // Act
+      await service.removeHistoryEntry(2);
+
+      // Assert
+      expect(historyRepository.removeAt).toHaveBeenCalledWith(2);
+    });
+  });
+
+  describe('clearHistory', () => {
+    it('should delegate to the history repository', async () => {
+      // Arrange
+      historyRepository.clear.mockResolvedValue(undefined);
+
+      // Act
+      await service.clearHistory();
+
+      // Assert
+      expect(historyRepository.clear).toHaveBeenCalledTimes(1);
     });
   });
 });

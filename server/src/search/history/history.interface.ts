@@ -5,4 +5,6 @@ export const HISTORY_REPOSITORY = Symbol('HISTORY_REPOSITORY');
 export interface HistoryRepository {
   save(query: string): Promise<void>;
   findAll(): Promise<HistoryEntry[]>;
+  removeAt(index: number): Promise<void>;
+  clear(): Promise<void>;
 }

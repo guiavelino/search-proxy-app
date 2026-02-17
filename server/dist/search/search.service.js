@@ -35,6 +35,12 @@ let SearchService = SearchService_1 = class SearchService {
     async getHistory() {
         return this.historyRepository.findAll();
     }
+    async removeHistoryEntry(index) {
+        return this.historyRepository.removeAt(index);
+    }
+    async clearHistory() {
+        return this.historyRepository.clear();
+    }
 };
 exports.SearchService = SearchService;
 exports.SearchService = SearchService = SearchService_1 = __decorate([

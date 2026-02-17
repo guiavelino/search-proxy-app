@@ -8,6 +8,3 @@ data/history.json
 README.md
 .prettierrc
 eslint.config.mjs
-tsconfig.json
-tsconfig.build.json
-nest-cli.json

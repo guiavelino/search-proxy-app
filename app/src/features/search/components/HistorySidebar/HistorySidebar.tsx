@@ -12,10 +12,24 @@ export const HistorySidebarView = memo(function HistorySidebarView({
   history,
   isHistoryLoading,
   onHistoryClick,
+  onRemoveEntry,
+  onClearHistory,
 }: HistorySidebarViewProps) {
   return (
     <aside className="history-sidebar" aria-label="Search history">
-      <h2 className="history-sidebar__title">Search History</h2>
+      <div className="history-sidebar__header">
+        <h2 className="history-sidebar__title">Search History</h2>
+        {history.length > 0 && (
+          <button
+            className="history-sidebar__clear-btn"
+            onClick={onClearHistory}
+            title="Clear all history"
+            aria-label="Clear all history"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
       {isHistoryLoading && history.length === 0 ? (
         <p className="history-sidebar__loading">Loading history...</p>
       ) : history.length === 0 ? (
@@ -33,6 +47,14 @@ export const HistorySidebarView = memo(function HistorySidebarView({
                 <span className="history-sidebar__time">
                   {dateFormatter.format(new Date(entry.timestamp))}
                 </span>
+              </button>
+              <button
+                className="history-sidebar__remove-btn"
+                onClick={() => onRemoveEntry(index)}
+                title={`Remove "${entry.query}" from history`}
+                aria-label={`Remove "${entry.query}" from history`}
+              >
+                ×
               </button>
             </li>
           ))}

@@ -8,4 +8,6 @@ export declare class SearchService {
     constructor(searchProvider: SearchProvider, historyRepository: HistoryRepository);
     search(query: string): Promise<SearchResult[]>;
     getHistory(): Promise<HistoryEntry[]>;
+    removeHistoryEntry(index: number): Promise<void>;
+    clearHistory(): Promise<void>;
 }

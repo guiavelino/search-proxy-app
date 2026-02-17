@@ -45,6 +45,24 @@ describe('HistorySidebar (Integration)', () => {
     })
   })
 
+  it('should not show clear button when history is empty', async () => {
+    // Arrange
+    server.use(
+      http.get('http://localhost:3000/search/history', () => {
+        return HttpResponse.json([])
+      }),
+    )
+
+    // Act
+    render(<HistorySidebar />)
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('No search history yet.')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Clear all')).not.toBeInTheDocument()
+  })
+
   it('should load and display history from API', async () => {
     // Act
     render(<HistorySidebar />)
@@ -53,6 +71,16 @@ describe('HistorySidebar (Integration)', () => {
     await waitFor(() => {
       expect(screen.getByText('react')).toBeInTheDocument()
       expect(screen.getByText('typescript')).toBeInTheDocument()
+    })
+  })
+
+  it('should show clear all button when history exists', async () => {
+    // Act
+    render(<HistorySidebar />)
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Clear all')).toBeInTheDocument()
     })
   })
 
@@ -70,6 +98,50 @@ describe('HistorySidebar (Integration)', () => {
     // Assert
     await waitFor(() => {
       expect(useSearchStore.getState().query).toBe('react')
+    })
+  })
+
+  it('should remove a single history entry when remove button is clicked', async () => {
+    // Arrange
+    const user = userEvent.setup()
+    render(<HistorySidebar />)
+    await waitFor(() => {
+      expect(screen.getByText('react')).toBeInTheDocument()
+    })
+
+    server.use(
+      http.get('http://localhost:3000/search/history', () => {
+        return HttpResponse.json([
+          { query: 'typescript', timestamp: '2025-01-02T00:00:00.000Z' },
+        ])
+      }),
+    )
+
+    // Act
+    const removeButtons = screen.getAllByLabelText(/Remove ".*" from history/)
+    await user.click(removeButtons[0])
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.queryByText('react')).not.toBeInTheDocument()
+      expect(screen.getByText('typescript')).toBeInTheDocument()
+    })
+  })
+
+  it('should clear all history when clear all button is clicked', async () => {
+    // Arrange
+    const user = userEvent.setup()
+    render(<HistorySidebar />)
+    await waitFor(() => {
+      expect(screen.getByText('react')).toBeInTheDocument()
+    })
+
+    // Act
+    await user.click(screen.getByText('Clear all'))
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('No search history yet.')).toBeInTheDocument()
     })
   })
 

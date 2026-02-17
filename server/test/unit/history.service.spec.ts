@@ -89,6 +89,101 @@ describe('HistoryService', () => {
     });
   });
 
+  describe('removeAt', () => {
+    it('should remove the entry at the given index', async () => {
+      // Arrange
+      mockedFs.writeFile.mockResolvedValue(undefined);
+      await service.save('react');
+      await service.save('vue');
+      await service.save('angular');
+
+      // Act
+      await service.removeAt(1);
+      const entries = await service.findAll();
+
+      // Assert
+      expect(entries).toHaveLength(2);
+      expect(entries[0].query).toBe('react');
+      expect(entries[1].query).toBe('angular');
+    });
+
+    it('should persist after removing', async () => {
+      // Arrange
+      mockedFs.writeFile.mockResolvedValue(undefined);
+      await service.save('react');
+      mockedFs.writeFile.mockClear();
+
+      // Act
+      await service.removeAt(0);
+
+      // Assert
+      expect(mockedFs.writeFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('should do nothing when index is out of bounds (negative)', async () => {
+      // Arrange
+      mockedFs.writeFile.mockResolvedValue(undefined);
+      await service.save('react');
+      mockedFs.writeFile.mockClear();
+
+      // Act
+      await service.removeAt(-1);
+      const entries = await service.findAll();
+
+      // Assert
+      expect(entries).toHaveLength(1);
+      expect(mockedFs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when index is out of bounds (too high)', async () => {
+      // Arrange
+      mockedFs.writeFile.mockResolvedValue(undefined);
+      await service.save('react');
+      mockedFs.writeFile.mockClear();
+
+      // Act
+      await service.removeAt(5);
+      const entries = await service.findAll();
+
+      // Assert
+      expect(entries).toHaveLength(1);
+      expect(mockedFs.writeFile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('clear', () => {
+    it('should remove all entries', async () => {
+      // Arrange
+      mockedFs.writeFile.mockResolvedValue(undefined);
+      await service.save('react');
+      await service.save('vue');
+
+      // Act
+      await service.clear();
+      const entries = await service.findAll();
+
+      // Assert
+      expect(entries).toHaveLength(0);
+    });
+
+    it('should persist the empty state', async () => {
+      // Arrange
+      mockedFs.writeFile.mockResolvedValue(undefined);
+      await service.save('react');
+      mockedFs.writeFile.mockClear();
+
+      // Act
+      await service.clear();
+
+      // Assert
+      expect(mockedFs.writeFile).toHaveBeenCalledTimes(1);
+      const written = JSON.parse(
+        mockedFs.writeFile.mock.calls[0][1] as string,
+      );
+      expect(written).toEqual([]);
+    });
+  });
+
   describe('onModuleInit (load)', () => {
     it('should load entries from existing file', async () => {
       // Arrange

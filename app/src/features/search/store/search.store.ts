@@ -19,6 +19,8 @@ interface SearchActions {
   search: (query: string) => Promise<void>
   setCurrentPage: (page: number) => void
   loadHistory: () => Promise<void>
+  removeHistoryEntry: (index: number) => Promise<void>
+  clearHistory: () => Promise<void>
   getTotalPages: () => number
   getPaginatedResults: () => SearchResult[]
 }
@@ -95,6 +97,24 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     } catch {
       // Keep existing history on failure — non-critical data
       set({ isHistoryLoading: false })
+    }
+  },
+
+  removeHistoryEntry: async (index: number) => {
+    try {
+      await searchService.removeHistoryEntry(index)
+      await get().loadHistory()
+    } catch {
+      // Silent fail — history is non-critical
+    }
+  },
+
+  clearHistory: async () => {
+    try {
+      await searchService.clearHistory()
+      set({ history: [] })
+    } catch {
+      // Silent fail — history is non-critical
     }
   },
 
