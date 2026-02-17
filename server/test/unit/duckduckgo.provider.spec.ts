@@ -1,5 +1,6 @@
+import { InternalServerErrorException } from '@nestjs/common';
 import axios from 'axios';
-import { DuckDuckGoProvider } from '../../src/search/provider/duckduckgo.provider';
+import { DuckDuckGoProvider } from '../../src/search/provider/duckduckgo/duckduckgo.provider';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -170,23 +171,26 @@ describe('DuckDuckGoProvider', () => {
     expect(results[0].url).toBe('https://official.com');
   });
 
-  it('should throw a wrapped error when the API call fails', async () => {
+  it('should throw InternalServerErrorException when the API call fails', async () => {
     // Arrange
     mockedAxios.get.mockRejectedValue(new Error('Network Error'));
 
     // Act & Assert
     await expect(provider.search('fail')).rejects.toThrow(
-      'Search provider failed for query "fail"',
+      InternalServerErrorException,
+    );
+    await expect(provider.search('fail')).rejects.toThrow(
+      'Search provider is currently unavailable',
     );
   });
 
-  it('should throw a wrapped error on timeout', async () => {
+  it('should throw InternalServerErrorException on timeout', async () => {
     // Arrange
     mockedAxios.get.mockRejectedValue(new Error('timeout of 10000ms exceeded'));
 
     // Act & Assert
     await expect(provider.search('slow')).rejects.toThrow(
-      'Search provider failed for query "slow"',
+      InternalServerErrorException,
     );
   });
 });

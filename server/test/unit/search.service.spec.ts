@@ -1,25 +1,23 @@
 import { SearchService } from '../../src/search/search.service';
 import type { SearchProvider } from '../../src/search/provider/search-provider.interface';
-import type { FileHistoryService } from '../../src/search/history/file-history.service';
+import type { HistoryService } from '../../src/search/history/history.interface';
 
 describe('SearchService', () => {
   let service: SearchService;
   let searchProvider: jest.Mocked<SearchProvider>;
-  let historyService: jest.Mocked<Pick<FileHistoryService, 'save' | 'findAll'>>;
+  let historyService: jest.Mocked<HistoryService>;
 
   beforeEach(() => {
     searchProvider = { search: jest.fn() };
     historyService = { save: jest.fn(), findAll: jest.fn() };
-    service = new SearchService(
-      searchProvider,
-      historyService as unknown as FileHistoryService,
-    );
+    service = new SearchService(searchProvider, historyService);
   });
 
   describe('search', () => {
     it('should call the search provider with the given query', async () => {
       // Arrange
       searchProvider.search.mockResolvedValue([]);
+      historyService.save.mockResolvedValue(undefined);
 
       // Act
       await service.search('react');
@@ -35,6 +33,7 @@ describe('SearchService', () => {
         { title: 'Vue', url: 'https://vuejs.org' },
       ];
       searchProvider.search.mockResolvedValue(results);
+      historyService.save.mockResolvedValue(undefined);
 
       // Act
       const response = await service.search('frontend');
@@ -47,6 +46,7 @@ describe('SearchService', () => {
     it('should save the query to history after a successful search', async () => {
       // Arrange
       searchProvider.search.mockResolvedValue([]);
+      historyService.save.mockResolvedValue(undefined);
 
       // Act
       await service.search('typescript');
@@ -76,6 +76,19 @@ describe('SearchService', () => {
 
       // Assert
       expect(historyService.save).not.toHaveBeenCalled();
+    });
+
+    it('should return results even when history save fails', async () => {
+      // Arrange
+      const results = [{ title: 'React', url: 'https://reactjs.org' }];
+      searchProvider.search.mockResolvedValue(results);
+      historyService.save.mockRejectedValue(new Error('Disk full'));
+
+      // Act
+      const response = await service.search('react');
+
+      // Assert
+      expect(response).toEqual(results);
     });
   });
 

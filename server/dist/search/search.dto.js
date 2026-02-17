@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const search_types_1 = require("./search.types");
 class SearchDto {
     q;
@@ -20,6 +21,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.MaxLength)(search_types_1.MAX_QUERY_LENGTH),
+    (0, class_transformer_1.Transform)(({ value }) => value.trim()),
     __metadata("design:type", String)
 ], SearchDto.prototype, "q", void 0);
 //# sourceMappingURL=search.dto.js.map

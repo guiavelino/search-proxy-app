@@ -25,7 +25,7 @@ src/
     history/                         # File-based history persistence
       file-history.service.ts
     search.types.ts                  # Domain types + constants
-    search.dto.ts                    # Request validation DTO
+    search.dto.ts                    # Request validation DTO (with trim transform)
     search.controller.ts             # HTTP endpoints (explicit return types)
     search.service.ts                # Orchestration (provider + history)
     search.module.ts                 # Module wiring
@@ -41,10 +41,12 @@ src/
 - **Single service layer**: Controller delegates everything to `SearchService` — no direct infrastructure access from the presentation layer.
 - **Unified DTO**: A single `SearchDto` is used for both GET and POST endpoints, eliminating duplication.
 - **Shared config**: `ValidationPipe` configuration is extracted to `app.config.ts` at the app root, shared between `main.ts` and integration tests.
-- **Error handling**: Provider wraps API errors with meaningful messages and logs them via NestJS Logger. Bootstrap has `.catch()` with graceful shutdown.
+- **Error handling**: Provider throws `InternalServerErrorException` with a user-friendly message (not raw Axios errors) and logs details via NestJS Logger. Bootstrap has `.catch()` with graceful shutdown.
+- **Non-blocking history**: History save is fire-and-forget — if persistence fails, search results are still returned. Errors are logged but don't break the response.
+- **Input sanitization**: DTO trims whitespace from queries via `@Transform` before validation.
 - **HTTP timeout**: External API calls have a 10s timeout to prevent hanging requests.
 - **History cap**: History is limited to the last 100 entries to prevent unbounded file growth.
-- **File-based persistence**: History is stored as JSON in `data/history.json` and loaded automatically via `OnModuleInit`.
+- **File-based persistence**: History is stored as JSON in `data/history.json`. The `data/` directory is created automatically at runtime — no need to track it in the repository.
 - **Validation**: DTO with `class-validator` decorators + global `ValidationPipe` with `whitelist` and `forbidNonWhitelisted`.
 - **Strict TypeScript**: `strict: true` for maximum type safety.
 - **CORS enabled**: Ready for cross-origin requests from the frontend.
@@ -76,7 +78,7 @@ npm run start:prod
 ## Tests
 
 ```bash
-# Unit tests (24 tests)
+# Unit tests (25 tests)
 npm test
 
 # Integration tests (7 tests)
@@ -86,7 +88,7 @@ npm run test:integration
 npm run test:all
 ```
 
-**Total: 31 tests** covering service logic, provider parsing (including error handling and timeout), file persistence (including history cap), and full HTTP endpoint flows.
+**Total: 32 tests** covering service logic, provider parsing (including error handling and timeout), file persistence (including history cap), and full HTTP endpoint flows.
 
 ## Docker
 

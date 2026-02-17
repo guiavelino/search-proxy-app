@@ -4,7 +4,8 @@ import supertest from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { SEARCH_PROVIDER } from '../../src/search/provider/search-provider.interface';
 import type { SearchProvider } from '../../src/search/provider/search-provider.interface';
-import { FileHistoryService } from '../../src/search/history/file-history.service';
+import { HISTORY_SERVICE } from '../../src/search/history/history.interface';
+import type { HistoryService } from '../../src/search/history/history.interface';
 import { validationPipeConfig } from '../../src/app.config';
 
 describe('SearchController (integration)', () => {
@@ -21,8 +22,7 @@ describe('SearchController (integration)', () => {
       search: jest.fn().mockResolvedValue(mockResults),
     };
 
-    const mockHistoryService = {
-      onModuleInit: jest.fn(),
+    const mockHistoryService: jest.Mocked<HistoryService> = {
       save: jest.fn().mockResolvedValue(undefined),
       findAll: jest.fn().mockResolvedValue([
         { query: 'react', timestamp: '2025-01-01T00:00:00.000Z' },
@@ -34,7 +34,7 @@ describe('SearchController (integration)', () => {
     })
       .overrideProvider(SEARCH_PROVIDER)
       .useValue(searchProvider)
-      .overrideProvider(FileHistoryService)
+      .overrideProvider(HISTORY_SERVICE)
       .useValue(mockHistoryService)
       .compile();
 

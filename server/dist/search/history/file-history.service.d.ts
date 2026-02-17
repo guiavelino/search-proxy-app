@@ -1,6 +1,7 @@
 import { OnModuleInit } from '@nestjs/common';
 import type { HistoryEntry } from '../search.types';
-export declare class FileHistoryService implements OnModuleInit {
+import type { HistoryService } from './history.interface';
+export declare class FileHistoryService implements HistoryService, OnModuleInit {
     private readonly logger;
     private readonly filePath;
     private entries;

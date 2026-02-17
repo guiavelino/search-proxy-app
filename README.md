@@ -64,7 +64,7 @@ docker compose up --build
 
 ## Tests
 
-### Backend (31 tests)
+### Backend (32 tests)
 
 ```bash
 cd server
