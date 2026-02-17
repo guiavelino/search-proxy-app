@@ -15,6 +15,7 @@ describe('Search Flow (Integration)', () => {
       isHistoryLoading: false,
       hasSearched: false,
       error: null,
+      isSidebarOpen: false,
     })
   })
 
@@ -32,10 +33,7 @@ describe('Search Flow (Integration)', () => {
     await waitFor(() => {
       expect(screen.getByText('12 results found')).toBeInTheDocument()
     })
-    const allLists = screen.getAllByRole('list')
-    const resultList = allLists.find(
-      (list) => !list.closest('.history-sidebar'),
-    )!
+    const resultList = screen.getAllByRole('list')[0]
     const items = within(resultList).getAllByRole('listitem')
     expect(items).toHaveLength(5)
   })
@@ -78,8 +76,12 @@ describe('Search Flow (Integration)', () => {
   })
 
   it('should load search history in sidebar', async () => {
-    // Act
+    // Arrange
+    const user = userEvent.setup()
     render(<App />)
+
+    // Act — open sidebar (mobile mode in jsdom)
+    await user.click(screen.getByLabelText('Toggle search history'))
 
     // Assert
     await waitFor(() => {
@@ -92,6 +94,9 @@ describe('Search Flow (Integration)', () => {
     // Arrange
     const user = userEvent.setup()
     render(<App />)
+
+    // Open sidebar first
+    await user.click(screen.getByLabelText('Toggle search history'))
     await waitFor(() => {
       expect(screen.getByText('typescript')).toBeInTheDocument()
     })

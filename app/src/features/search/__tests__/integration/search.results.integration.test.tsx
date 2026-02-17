@@ -130,7 +130,7 @@ describe('ResultsList (Integration)', () => {
     // Assert
     const counter = screen.getByTestId('match-counter')
     expect(counter).toBeInTheDocument()
-    expect(counter.textContent).toContain('highlighted on this page')
+    expect(counter.textContent).toContain('highlighted')
   })
 
   it('should render result URLs as links', () => {

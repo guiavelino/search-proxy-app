@@ -5,5 +5,3 @@ export function Pagination() {
   const props = usePagination()
   return <PaginationView {...props} />
 }
-
-export { PaginationView }

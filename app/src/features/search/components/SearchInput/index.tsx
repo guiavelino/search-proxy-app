@@ -5,5 +5,3 @@ export function SearchInput() {
   const props = useSearchInput()
   return <SearchInputView {...props} />
 }
-
-export { SearchInputView }

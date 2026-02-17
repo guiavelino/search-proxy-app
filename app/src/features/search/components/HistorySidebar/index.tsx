@@ -5,5 +5,3 @@ export function HistorySidebar() {
   const props = useHistorySidebar()
   return <HistorySidebarView {...props} />
 }
-
-export { HistorySidebarView }

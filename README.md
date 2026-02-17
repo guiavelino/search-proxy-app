@@ -4,11 +4,11 @@ Full-stack application that acts as a search proxy for the DuckDuckGo Instant An
 
 ## Tech Stack
 
-| Layer    | Technology                                          |
-| -------- | --------------------------------------------------- |
-| Frontend | React 19, TypeScript, Vite, Zustand, SCSS, Vitest   |
-| Backend  | NestJS 11, TypeScript (strict), Axios, Jest          |
-| Infra    | Docker, Docker Compose                               |
+| Layer    | Technology                                                        |
+| -------- | ----------------------------------------------------------------- |
+| Frontend | React 19, TypeScript, Vite, Zustand, Tailwind CSS, shadcn/ui, Vitest |
+| Backend  | NestJS 11, TypeScript (strict), Axios, Jest                       |
+| Infra    | Docker, Docker Compose                                            |
 
 ## Project Structure
 
@@ -107,7 +107,7 @@ npm run test:integration
 npm run test:all
 ```
 
-### Frontend (77 tests)
+### Frontend (76 tests)
 
 ```bash
 cd app
@@ -122,7 +122,7 @@ npm run test:run
 npm run test:coverage
 ```
 
-**Total: 120 tests** across both projects.
+**Total: 119 tests** across both projects.
 
 ## API Endpoints
 
@@ -138,15 +138,15 @@ npm run test:coverage
 
 - **Search proxy** — Backend forwards queries to DuckDuckGo and returns filtered results (title + url)
 - **Search history** — Persisted to local file, auto-loaded on server restart, capped at 100 entries
-- **History management** — Remove individual entries or clear all history
-- **Client-side pagination** — Results paginated in the frontend (5 per page)
+- **History management** — Remove individual entries or clear all history (optimistic UI updates)
+- **Client-side pagination** — Results paginated in the frontend (5 per page) with ellipsis navigation
 - **Search term highlighting** — Matching terms highlighted in results with match count
-- **History sidebar** — Click to re-execute past searches, with remove and clear actions
+- **History sidebar** — Click to re-execute past searches, with timestamps and remove/clear actions
 - **Request cancellation** — In-flight requests aborted when a new search starts
 - **Provider abstraction** — Backend uses Liskov-compliant interface, allowing easy provider swap
-- **Responsive UI** — Clean interface with SCSS, accessibility (ARIA), and loading states
+- **Responsive UI** — Tailwind CSS with permanent sidebar on desktop, drawer on mobile/tablet
 
 ## Technical Overview
 
 - **Backend**: Pragmatic NestJS module with a `SearchProvider` interface (Liskov Substitution) for the search source, `HistoryRepository` interface for persistence, unified DTO validation, and strict TypeScript. Provider errors are caught and logged, HTTP requests have a 10s timeout.
-- **Frontend**: Feature-based React architecture with the Container Hook pattern. Zustand manages global state with separated data/actions interfaces. Performance is optimized with `React.memo`, `useCallback`, `useMemo`, and `AbortController` for request cancellation.
+- **Frontend**: Feature-based React architecture with the Container Hook pattern. Zustand manages global state with separated data/actions interfaces. Performance is optimized with `React.memo`, `useCallback`, `useMemo`, and `AbortController` for request cancellation. UI built with Tailwind CSS and shadcn/ui components.

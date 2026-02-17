@@ -43,16 +43,6 @@ describe('useSearchStore', () => {
     })
   })
 
-  describe('setQuery', () => {
-    it('should update the query', () => {
-      // Act
-      useSearchStore.getState().setQuery('react')
-
-      // Assert
-      expect(useSearchStore.getState().query).toBe('react')
-    })
-  })
-
   describe('search', () => {
     it('should not search when query is empty', async () => {
       // Act
@@ -342,18 +332,10 @@ describe('useSearchStore', () => {
   })
 
   describe('removeHistoryEntry', () => {
-    it('should call the API and reload history after removing', async () => {
+    it('should optimistically remove the entry from local state', async () => {
       // Arrange
       await useSearchStore.getState().loadHistory()
       expect(useSearchStore.getState().history).toHaveLength(2)
-
-      server.use(
-        http.get(`${API_BASE_URL}/search/history`, () => {
-          return HttpResponse.json([
-            { query: 'typescript', timestamp: '2025-01-02T00:00:00.000Z' },
-          ])
-        }),
-      )
 
       // Act
       await useSearchStore.getState().removeHistoryEntry(0)

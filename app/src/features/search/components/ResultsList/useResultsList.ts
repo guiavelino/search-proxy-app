@@ -34,22 +34,14 @@ export function useResultsList(): ResultsListViewProps {
   }, [results, currentPage])
 
   const { highlightedResults, totalMatchCount } = useMemo(() => {
-    const accumulated = paginatedResults.reduce<{
-      items: HighlightedResult[]
-      count: number
-    }>(
-      (acc, result) => {
-        const { segments, matchCount } = highlightText(result.title, query)
-        acc.items.push({ result, segments, matchCount })
-        acc.count += matchCount
-        return acc
-      },
-      { items: [], count: 0 },
-    )
+    const items = paginatedResults.map((result) => {
+      const { segments, matchCount } = highlightText(result.title, query)
+      return { result, segments, matchCount }
+    })
 
     return {
-      highlightedResults: accumulated.items,
-      totalMatchCount: accumulated.count,
+      highlightedResults: items,
+      totalMatchCount: items.reduce((sum, r) => sum + r.matchCount, 0),
     }
   }, [paginatedResults, query])
 

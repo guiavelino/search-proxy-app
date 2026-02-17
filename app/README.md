@@ -7,7 +7,11 @@ A React application that serves as the frontend for the Search Proxy platform. I
 - **React 19** with TypeScript
 - **Vite** — fast build tool and dev server
 - **Zustand** — lightweight global state management
-- **SCSS** — styling with variables, nesting, and mixins
+- **Tailwind CSS** — utility-first CSS framework
+- **shadcn/ui** — accessible component primitives (Sheet, Pagination, Button)
+- **Radix UI** — headless UI primitives (used by shadcn/ui)
+- **lucide-react** — icon library
+- **date-fns** — date formatting
 - **Axios** — HTTP client with centralized interceptors
 - **Vitest** — unit and integration testing
 - **React Testing Library** — component testing with user-centric approach
@@ -21,13 +25,14 @@ The project follows a **feature-based architecture** with the **Container Hook p
 
 - **Feature-based structure** — All search-related code lives under `features/search/`, making it easy to find context and scale.
 - **Container Hook pattern** — Each component is split into a pure view (`ComponentName.tsx`) and a container hook (`useComponentName.ts`). The view receives everything via props and has zero logic. The hook handles state, handlers, and computed values.
-- **Three-layer hooks** — `Store → Domain Hooks → Container Hooks → Views`. Components never access the store directly.
 - **Domain-oriented service** — `searchService.executeSearch()` hides HTTP transport details. The UI never knows how the API is called.
 - **Shared HTTP client** — Axios instance configured globally in `shared/lib/http/` with centralized interceptors for error handling.
 - **Separated state interface** — Zustand store types are split into `SearchData` (state) and `SearchActions` (behavior) for clarity.
 - **Request cancellation** — `AbortController` cancels in-flight HTTP requests when a newer search is triggered, combined with a search ID counter to discard stale responses.
-- **Performance-conscious memoization** — `React.memo` on pure views, `useCallback` on handlers, `useMemo` on derived data (`paginatedResults`, `highlightedResults`, `pages`). Local input state avoids global store updates on every keystroke.
-- **Domain constants in model** — `RESULTS_PER_PAGE` and `MAX_QUERY_LENGTH` live in `model/search.ts`, not in components or the store.
+- **Optimistic updates** — History removal and clearing update the UI immediately, reverting on API failure.
+- **Performance-conscious memoization** — `React.memo` on pure views, `useCallback` on handlers, `useMemo` on derived data (`paginatedResults`, `highlightedResults`, `visiblePages`). Local input state avoids global store updates on every keystroke.
+- **Responsive sidebar** — Desktop renders a permanent `<aside>`, mobile/tablet renders a `Sheet` (drawer). Controlled by `useMediaQuery` hook.
+- **Domain constants in model** — `RESULTS_PER_PAGE`, `MAX_QUERY_LENGTH`, and `MAX_VISIBLE_PAGES` live in `model/search.ts`, not in components or the store.
 - **Type-safe environment** — `vite-env.d.ts` types `import.meta.env` variables.
 - **Test factories** — Consistent test data creation via factory functions instead of hardcoded mock objects.
 - **Custom render** — A shared `render()` function wraps components with all required providers, keeping tests clean.
@@ -39,47 +44,35 @@ The project follows a **feature-based architecture** with the **Container Hook p
 |---|---|---|
 | React components | PascalCase | `SearchInput.tsx`, `ResultsList.tsx` |
 | Container hooks | camelCase with `use` prefix | `useSearchInput.ts`, `usePagination.ts` |
-| Domain hooks | kebab-case with `use-` prefix | `use-search.ts`, `use-pagination.ts` |
 | Everything else | dot notation with domain prefix | `search.store.ts`, `search.service.ts`, `search.highlight.ts` |
 | Tests | dot notation with intent suffix | `search.store.test.ts`, `search.input.integration.test.tsx` |
-| SCSS partials | underscore prefix | `_variables.scss`, `_mixins.scss` |
 
 ## Project Structure
 
 ```
 src/
 ├── app/                              # Application bootstrap
-│   ├── App.tsx                       # Root layout with aria-live regions
-│   └── App.scss
+│   └── App.tsx                       # Root layout with responsive sidebar
 │
 ├── features/
 │   └── search/                       # Search domain (core feature)
 │       ├── components/
 │       │   ├── SearchInput/
 │       │   │   ├── SearchInput.tsx    # Pure view (React.memo)
-│       │   │   ├── useSearchInput.ts  # Container hook (useCallback)
-│       │   │   ├── SearchInput.scss
+│       │   │   ├── useSearchInput.ts  # Container hook
 │       │   │   └── index.tsx          # Connects hook + view
 │       │   ├── ResultsList/
 │       │   │   ├── ResultsList.tsx
 │       │   │   ├── useResultsList.ts
-│       │   │   ├── ResultsList.scss
 │       │   │   └── index.tsx
 │       │   ├── Pagination/
 │       │   │   ├── Pagination.tsx
 │       │   │   ├── usePagination.ts
-│       │   │   ├── Pagination.scss
 │       │   │   └── index.tsx
 │       │   └── HistorySidebar/
-│       │       ├── HistorySidebar.tsx
+│       │       ├── HistorySidebar.tsx  # Desktop aside + mobile Sheet
 │       │       ├── useHistorySidebar.ts
-│       │       ├── HistorySidebar.scss
 │       │       └── index.tsx
-│       ├── hooks/                    # Domain hooks (shared within feature)
-│       │   ├── use-search.ts
-│       │   ├── use-pagination.ts     # Memoized paginatedResults
-│       │   ├── use-search-history.ts
-│       │   └── index.ts
 │       ├── store/
 │       │   └── search.store.ts       # Zustand store (SearchData + SearchActions)
 │       ├── services/
@@ -101,26 +94,32 @@ src/
 │               └── search.store.test.ts
 │
 ├── shared/
+│   ├── components/
+│   │   └── ui/                      # shadcn/ui components
+│   │       ├── button.tsx
+│   │       ├── pagination.tsx
+│   │       └── sheet.tsx
 │   ├── lib/
-│   │   └── http/                     # Axios client + interceptors
-│   │       ├── http.client.ts
-│   │       ├── http.interceptors.ts
-│   │       └── index.ts
-│   ├── styles/
-│   │   ├── _variables.scss           # Design tokens
-│   │   └── _mixins.scss              # Reusable mixins
+│   │   ├── http/                    # Axios client + interceptors
+│   │   │   ├── http.client.ts
+│   │   │   ├── http.interceptors.ts
+│   │   │   └── index.ts
+│   │   ├── hooks/
+│   │   │   ├── useMediaQuery.ts     # Reactive CSS media query hook
+│   │   │   └── index.ts
+│   │   └── utils.ts                 # Tailwind class merge utility (cn)
 │   └── test/
-│       ├── render.ts                 # Custom render with providers
-│       ├── setup.ts                  # Vitest global setup (MSW, cleanup)
+│       ├── render.ts                # Custom render with providers
+│       ├── setup.ts                 # Vitest global setup (MSW, cleanup)
 │       ├── mocks/
 │       │   ├── handlers.ts
 │       │   └── server.ts
 │       └── factories/
-│           └── search.factory.ts     # Test data factories
+│           └── search.factory.ts    # Test data factories
 │
-├── vite-env.d.ts                     # Typed environment variables
-├── index.scss                        # Global styles
-└── main.tsx                          # Entry point with root guard
+├── vite-env.d.ts                    # Typed environment variables
+├── index.css                        # Tailwind directives + theme tokens
+└── main.tsx                         # Entry point with root guard
 ```
 
 ## Getting Started
@@ -189,13 +188,13 @@ Tests are organized by **intent**, not by file location:
 | `integration/` | Component behavior with user interaction | type → search → see results |
 | `store/` | Zustand actions, state transitions, error handling | search with API failure, pagination bounds |
 
-**77 tests** across 7 test suites covering:
+**76 tests** across 7 test suites covering:
 - Happy paths and error scenarios
 - Race condition handling (AbortController + stale response discard)
 - Pagination bounds validation
 - Network failures and API errors
 - Empty state feedback ("no results found")
-- History loading states
+- History loading states and optimistic updates
 - Input validation (max query length)
 - Full user flows (search → results → paginate → history replay)
 
@@ -206,12 +205,13 @@ Tests are organized by **intent**, not by file location:
 - **Empty State** — Shows feedback when a search returns no results
 - **Highlight** — Matching search terms are highlighted in result titles
 - **Match Counter** — Shows total highlighted matches on the current page
-- **Client-Side Pagination** — Results are paginated (5 per page) with bounds validation
-- **Search History Sidebar** — Shows previous searches with loading state; click to re-execute
-- **History Management** — Remove individual history entries or clear all history
+- **Client-Side Pagination** — Results are paginated (5 per page) with ellipsis navigation
+- **Search History Sidebar** — Shows previous searches with timestamps; click to re-execute
+- **History Management** — Remove individual history entries or clear all history (optimistic)
 - **Request Cancellation** — In-flight requests are aborted when a new search starts
+- **Responsive Layout** — Permanent sidebar on desktop, drawer (Sheet) on mobile/tablet
 - **Accessible** — ARIA labels, roles, live regions for screen readers
-- **Consistent Dates** — `Intl.DateTimeFormat` for locale-stable date rendering
+- **Consistent Dates** — `date-fns` for locale-stable date rendering (`dd/MM/yyyy - HH:mm:ss`)
 
 ## API Endpoints Expected
 

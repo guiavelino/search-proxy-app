@@ -16,7 +16,6 @@ interface SearchData {
 }
 
 interface SearchActions {
-  setQuery: (query: string) => void
   search: (query: string) => Promise<void>
   setCurrentPage: (page: number) => void
   loadHistory: () => Promise<void>
@@ -28,7 +27,6 @@ interface SearchActions {
 
 type SearchState = SearchData & SearchActions
 
-// Internal mutable state — not reactive, no re-renders needed
 const searchInternals = {
   activeSearchId: 0,
   activeSearchController: null as AbortController | null,
@@ -51,12 +49,9 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   error: null,
   isSidebarOpen: false,
 
-  setQuery: (query: string) => set({ query }),
-
   search: async (query: string) => {
     if (!query.trim()) return
 
-    // Cancel any in-flight request before starting a new one
     searchInternals.activeSearchController?.abort()
     const controller = new AbortController()
     searchInternals.activeSearchController = controller
@@ -67,21 +62,18 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     try {
       const results = await searchService.executeSearch(query, controller.signal)
 
-      // Discard if a newer search was triggered while this one was in-flight
       if (searchId !== searchInternals.activeSearchId) return
 
       set({ results, isLoading: false })
-
-      // Reload history after a search (backend saves it) — fire-and-forget
       void get().loadHistory()
     } catch {
       if (searchId !== searchInternals.activeSearchId) return
 
-      set({
-        error: 'Failed to fetch search results. Please try again.',
-        isLoading: false,
-        results: [],
-      })
+      set({ error: 'Failed to fetch search results. Please try again.', isLoading: false, results: [] })
+    } finally {
+      if (searchInternals.activeSearchController === controller) {
+        searchInternals.activeSearchController = null
+      }
     }
   },
 
@@ -97,26 +89,29 @@ export const useSearchStore = create<SearchState>((set, get) => ({
       const history = await searchService.getHistory()
       set({ history, isHistoryLoading: false })
     } catch {
-      // Keep existing history on failure — non-critical data
       set({ isHistoryLoading: false })
     }
   },
 
   removeHistoryEntry: async (index: number) => {
+    const previousHistory = get().history
+    set({ history: previousHistory.filter((_, i) => i !== index) })
+
     try {
       await searchService.removeHistoryEntry(index)
-      await get().loadHistory()
     } catch {
-      // Silent fail — history is non-critical
+      set({ history: previousHistory })
     }
   },
 
   clearHistory: async () => {
+    const previousHistory = get().history
+    set({ history: [] })
+
     try {
       await searchService.clearHistory()
-      set({ history: [] })
     } catch {
-      // Silent fail — history is non-critical
+      set({ history: previousHistory })
     }
   },
 

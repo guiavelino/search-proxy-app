@@ -26,7 +26,7 @@ describe('HistorySidebar (Integration)', () => {
     render(<HistorySidebar />)
 
     // Assert
-    expect(screen.getByText('Search History')).toBeInTheDocument()
+    expect(screen.getByText('History')).toBeInTheDocument()
   })
 
   it('should show empty message when no history exists', async () => {
@@ -61,7 +61,7 @@ describe('HistorySidebar (Integration)', () => {
     await waitFor(() => {
       expect(screen.getByText('No search history yet.')).toBeInTheDocument()
     })
-    expect(screen.queryByText('Clear all')).not.toBeInTheDocument()
+    expect(screen.queryByText('Clear')).not.toBeInTheDocument()
   })
 
   it('should load and display history from API', async () => {
@@ -81,7 +81,7 @@ describe('HistorySidebar (Integration)', () => {
 
     // Assert
     await waitFor(() => {
-      expect(screen.getByText('Clear all')).toBeInTheDocument()
+      expect(screen.getByText('Clear')).toBeInTheDocument()
     })
   })
 
@@ -110,14 +110,6 @@ describe('HistorySidebar (Integration)', () => {
       expect(screen.getByText('react')).toBeInTheDocument()
     })
 
-    server.use(
-      http.get('http://localhost:3000/search/history', () => {
-        return HttpResponse.json([
-          { query: 'typescript', timestamp: '2025-01-02T00:00:00.000Z' },
-        ])
-      }),
-    )
-
     // Act
     const removeButtons = screen.getAllByLabelText(/Remove ".*" from history/)
     await user.click(removeButtons[0])
@@ -138,7 +130,7 @@ describe('HistorySidebar (Integration)', () => {
     })
 
     // Act
-    await user.click(screen.getByText('Clear all'))
+    await user.click(screen.getByLabelText('Clear all history'))
 
     // Assert
     await waitFor(() => {
@@ -162,8 +154,9 @@ describe('HistorySidebar (Integration)', () => {
     // Act
     render(<HistorySidebar />)
 
-    // Assert
-    expect(screen.getByLabelText('Search history')).toBeInTheDocument()
+    // Assert — in jsdom (mobile mode), Sheet renders as a dialog
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('History')).toBeInTheDocument()
   })
 
   it('should show loading state when history is being fetched', () => {

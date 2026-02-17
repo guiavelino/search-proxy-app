@@ -8,7 +8,7 @@ const API_BASE_URL = 'http://localhost:3000'
 
 export const mockSearchResults = createSearchResults(12)
 
-export const mockHistory = [
+const mockHistory = [
   createHistoryEntry({ query: 'react', timestamp: '2025-01-01T00:00:00.000Z' }),
   createHistoryEntry({ query: 'typescript', timestamp: '2025-01-02T00:00:00.000Z' }),
 ]

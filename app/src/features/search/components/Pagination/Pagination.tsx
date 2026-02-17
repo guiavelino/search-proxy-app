@@ -1,13 +1,22 @@
 import { memo } from 'react'
 import type { PaginationViewProps } from './usePagination'
-import './Pagination.scss'
+import {
+  Pagination as PaginationRoot,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from '@/shared/components/ui/pagination'
 
 export const PaginationView = memo(function PaginationView({
   isVisible,
   currentPage,
+  totalPages,
   visiblePages,
-  isPreviousDisabled,
-  isNextDisabled,
+  showLeftEllipsis,
+  showRightEllipsis,
   onPageChange,
   onPrevious,
   onNext,
@@ -17,40 +26,78 @@ export const PaginationView = memo(function PaginationView({
   }
 
   return (
-    <nav className="pagination" aria-label="Search results pagination">
-      <button
-        className="pagination__button"
-        onClick={onPrevious}
-        disabled={isPreviousDisabled}
-        aria-label="Go to previous page"
-      >
-        Previous
-      </button>
+    <PaginationRoot className="mt-6" aria-label="Search results pagination">
+      <PaginationContent className="gap-1">
+        <PaginationItem>
+          <PaginationPrevious
+            onClick={onPrevious}
+            className={currentPage === 1 ? 'pointer-events-none opacity-30' : 'cursor-pointer hover:bg-slate-100'}
+            aria-disabled={currentPage === 1}
+            aria-label="Go to previous page"
+          />
+        </PaginationItem>
 
-      <div className="pagination__pages">
+        {showLeftEllipsis && (
+          <>
+            <PaginationItem>
+              <PaginationLink
+                onClick={() => onPageChange(1)}
+                className="cursor-pointer hover:bg-slate-100 text-slate-600"
+                aria-label="Go to page 1"
+              >
+                1
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          </>
+        )}
+
         {visiblePages.map((page) => (
-          <button
-            key={page}
-            className={`pagination__page ${
-              page === currentPage ? 'pagination__page--active' : ''
-            }`}
-            onClick={() => onPageChange(page)}
-            aria-label={`Go to page ${page}`}
-            aria-current={page === currentPage ? 'page' : undefined}
-          >
-            {page}
-          </button>
+          <PaginationItem key={page}>
+            <PaginationLink
+              isActive={page === currentPage}
+              onClick={() => onPageChange(page)}
+              className={
+                page === currentPage
+                  ? 'bg-indigo-700 text-white border-indigo-700 hover:bg-indigo-700 cursor-default'
+                  : 'cursor-pointer hover:bg-slate-100 text-slate-600'
+              }
+              aria-label={`Go to page ${page}`}
+              aria-current={page === currentPage ? 'page' : undefined}
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
         ))}
-      </div>
 
-      <button
-        className="pagination__button"
-        onClick={onNext}
-        disabled={isNextDisabled}
-        aria-label="Go to next page"
-      >
-        Next
-      </button>
-    </nav>
+        {showRightEllipsis && (
+          <>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink
+                onClick={() => onPageChange(totalPages)}
+                className="cursor-pointer hover:bg-slate-100 text-slate-600"
+                aria-label={`Go to page ${totalPages}`}
+              >
+                {totalPages}
+              </PaginationLink>
+            </PaginationItem>
+          </>
+        )}
+
+        <PaginationItem>
+          <PaginationNext
+            onClick={onNext}
+            className={currentPage === totalPages ? 'pointer-events-none opacity-30' : 'cursor-pointer hover:bg-slate-100'}
+            aria-disabled={currentPage === totalPages}
+            aria-label="Go to next page"
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </PaginationRoot>
   )
 })

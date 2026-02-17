@@ -85,8 +85,8 @@ describe('Pagination (Integration)', () => {
     // Act
     render(<Pagination />)
 
-    // Assert
-    expect(screen.getByLabelText('Go to previous page')).toBeDisabled()
+    // Assert — shadcn Pagination uses aria-disabled on anchor elements
+    expect(screen.getByLabelText('Go to previous page')).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('should disable Next button on last page', () => {
@@ -100,8 +100,8 @@ describe('Pagination (Integration)', () => {
     // Act
     render(<Pagination />)
 
-    // Assert
-    expect(screen.getByLabelText('Go to next page')).toBeDisabled()
+    // Assert — shadcn Pagination uses aria-disabled on anchor elements
+    expect(screen.getByLabelText('Go to next page')).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('should navigate to next page when Next is clicked', async () => {
