@@ -15,32 +15,32 @@ var SearchService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchService = void 0;
 const common_1 = require("@nestjs/common");
-const search_provider_interface_1 = require("./provider/search-provider.interface");
+const provider_interface_1 = require("./provider/provider.interface");
 const history_interface_1 = require("./history/history.interface");
 let SearchService = SearchService_1 = class SearchService {
     searchProvider;
-    historyService;
+    historyRepository;
     logger = new common_1.Logger(SearchService_1.name);
-    constructor(searchProvider, historyService) {
+    constructor(searchProvider, historyRepository) {
         this.searchProvider = searchProvider;
-        this.historyService = historyService;
+        this.historyRepository = historyRepository;
     }
     async search(query) {
         const results = await this.searchProvider.search(query);
-        this.historyService.save(query).catch((error) => {
+        this.historyRepository.save(query).catch((error) => {
             this.logger.error(`Failed to save history for "${query}"`, error instanceof Error ? error.message : String(error));
         });
         return results;
     }
     async getHistory() {
-        return this.historyService.findAll();
+        return this.historyRepository.findAll();
     }
 };
 exports.SearchService = SearchService;
 exports.SearchService = SearchService = SearchService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(search_provider_interface_1.SEARCH_PROVIDER)),
-    __param(1, (0, common_1.Inject)(history_interface_1.HISTORY_SERVICE)),
+    __param(0, (0, common_1.Inject)(provider_interface_1.SEARCH_PROVIDER)),
+    __param(1, (0, common_1.Inject)(history_interface_1.HISTORY_REPOSITORY)),
     __metadata("design:paramtypes", [Object, Object])
 ], SearchService);
 //# sourceMappingURL=search.service.js.map

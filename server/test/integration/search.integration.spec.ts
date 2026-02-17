@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import supertest from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { SEARCH_PROVIDER } from '../../src/search/provider/search-provider.interface';
-import type { SearchProvider } from '../../src/search/provider/search-provider.interface';
-import { HISTORY_SERVICE } from '../../src/search/history/history.interface';
-import type { HistoryService } from '../../src/search/history/history.interface';
+import { SEARCH_PROVIDER } from '../../src/search/provider/provider.interface';
+import type { SearchProvider } from '../../src/search/provider/provider.interface';
+import { HISTORY_REPOSITORY } from '../../src/search/history/history.interface';
+import type { HistoryRepository } from '../../src/search/history/history.interface';
 import { validationPipeConfig } from '../../src/app.config';
 
 describe('SearchController (integration)', () => {
@@ -22,7 +22,7 @@ describe('SearchController (integration)', () => {
       search: jest.fn().mockResolvedValue(mockResults),
     };
 
-    const mockHistoryService: jest.Mocked<HistoryService> = {
+    const mockHistoryRepository: jest.Mocked<HistoryRepository> = {
       save: jest.fn().mockResolvedValue(undefined),
       findAll: jest.fn().mockResolvedValue([
         { query: 'react', timestamp: '2025-01-01T00:00:00.000Z' },
@@ -34,8 +34,8 @@ describe('SearchController (integration)', () => {
     })
       .overrideProvider(SEARCH_PROVIDER)
       .useValue(searchProvider)
-      .overrideProvider(HISTORY_SERVICE)
-      .useValue(mockHistoryService)
+      .overrideProvider(HISTORY_REPOSITORY)
+      .useValue(mockHistoryRepository)
       .compile();
 
     app = moduleFixture.createNestApplication();

@@ -3,11 +3,11 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { HistoryEntry } from '../search.types';
 import { MAX_HISTORY_ENTRIES } from '../search.types';
-import type { HistoryService } from './history.interface';
+import type { HistoryRepository } from './history.interface';
 
 @Injectable()
-export class FileHistoryService implements HistoryService, OnModuleInit {
-  private readonly logger = new Logger(FileHistoryService.name);
+export class HistoryService implements HistoryRepository, OnModuleInit {
+  private readonly logger = new Logger(HistoryService.name);
   private readonly filePath = path.resolve(
     process.cwd(),
     'data',

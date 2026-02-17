@@ -115,5 +115,5 @@ npm run test:coverage
 
 ## Technical Overview
 
-- **Backend**: Pragmatic NestJS module with a `SearchProvider` interface (Liskov Substitution) for the search source, `FileHistoryService` for persistence, unified DTO validation, and strict TypeScript. Provider errors are caught and logged, HTTP requests have a 10s timeout.
+- **Backend**: Pragmatic NestJS module with a `SearchProvider` interface (Liskov Substitution) for the search source, `HistoryRepository` interface for persistence, unified DTO validation, and strict TypeScript. Provider errors are caught and logged, HTTP requests have a 10s timeout.
 - **Frontend**: Feature-based React architecture with the Container Hook pattern. Zustand manages global state with separated data/actions interfaces. Performance is optimized with `React.memo`, `useCallback`, `useMemo`, and `AbortController` for request cancellation.

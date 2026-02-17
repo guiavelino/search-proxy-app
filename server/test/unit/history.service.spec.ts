@@ -1,15 +1,15 @@
 import * as fs from 'fs/promises';
-import { FileHistoryService } from '../../src/search/history/file-history.service';
+import { HistoryService } from '../../src/search/history/history.service';
 import { MAX_HISTORY_ENTRIES } from '../../src/search/search.types';
 
 jest.mock('fs/promises');
 const mockedFs = fs as jest.Mocked<typeof fs>;
 
-describe('FileHistoryService', () => {
-  let service: FileHistoryService;
+describe('HistoryService', () => {
+  let service: HistoryService;
 
   beforeEach(() => {
-    service = new FileHistoryService();
+    service = new HistoryService();
     jest.clearAllMocks();
   });
 

@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { SEARCH_PROVIDER } from './provider/search-provider.interface';
-import type { SearchProvider } from './provider/search-provider.interface';
-import { HISTORY_SERVICE } from './history/history.interface';
-import type { HistoryService } from './history/history.interface';
+import { SEARCH_PROVIDER } from './provider/provider.interface';
+import type { SearchProvider } from './provider/provider.interface';
+import { HISTORY_REPOSITORY } from './history/history.interface';
+import type { HistoryRepository } from './history/history.interface';
 import type { SearchResult, HistoryEntry } from './search.types';
 
 @Injectable()
@@ -12,14 +12,14 @@ export class SearchService {
   constructor(
     @Inject(SEARCH_PROVIDER)
     private readonly searchProvider: SearchProvider,
-    @Inject(HISTORY_SERVICE)
-    private readonly historyService: HistoryService,
+    @Inject(HISTORY_REPOSITORY)
+    private readonly historyRepository: HistoryRepository,
   ) {}
 
   async search(query: string): Promise<SearchResult[]> {
     const results = await this.searchProvider.search(query);
 
-    this.historyService.save(query).catch((error) => {
+    this.historyRepository.save(query).catch((error) => {
       this.logger.error(
         `Failed to save history for "${query}"`,
         error instanceof Error ? error.message : String(error),
@@ -30,6 +30,6 @@ export class SearchService {
   }
 
   async getHistory(): Promise<HistoryEntry[]> {
-    return this.historyService.findAll();
+    return this.historyRepository.findAll();
   }
 }

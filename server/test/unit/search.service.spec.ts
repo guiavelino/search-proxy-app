@@ -1,23 +1,23 @@
 import { SearchService } from '../../src/search/search.service';
-import type { SearchProvider } from '../../src/search/provider/search-provider.interface';
-import type { HistoryService } from '../../src/search/history/history.interface';
+import type { SearchProvider } from '../../src/search/provider/provider.interface';
+import type { HistoryRepository } from '../../src/search/history/history.interface';
 
 describe('SearchService', () => {
   let service: SearchService;
   let searchProvider: jest.Mocked<SearchProvider>;
-  let historyService: jest.Mocked<HistoryService>;
+  let historyRepository: jest.Mocked<HistoryRepository>;
 
   beforeEach(() => {
     searchProvider = { search: jest.fn() };
-    historyService = { save: jest.fn(), findAll: jest.fn() };
-    service = new SearchService(searchProvider, historyService);
+    historyRepository = { save: jest.fn(), findAll: jest.fn() };
+    service = new SearchService(searchProvider, historyRepository);
   });
 
   describe('search', () => {
     it('should call the search provider with the given query', async () => {
       // Arrange
       searchProvider.search.mockResolvedValue([]);
-      historyService.save.mockResolvedValue(undefined);
+      historyRepository.save.mockResolvedValue(undefined);
 
       // Act
       await service.search('react');
@@ -33,7 +33,7 @@ describe('SearchService', () => {
         { title: 'Vue', url: 'https://vuejs.org' },
       ];
       searchProvider.search.mockResolvedValue(results);
-      historyService.save.mockResolvedValue(undefined);
+      historyRepository.save.mockResolvedValue(undefined);
 
       // Act
       const response = await service.search('frontend');
@@ -46,13 +46,13 @@ describe('SearchService', () => {
     it('should save the query to history after a successful search', async () => {
       // Arrange
       searchProvider.search.mockResolvedValue([]);
-      historyService.save.mockResolvedValue(undefined);
+      historyRepository.save.mockResolvedValue(undefined);
 
       // Act
       await service.search('typescript');
 
       // Assert
-      expect(historyService.save).toHaveBeenCalledWith('typescript');
+      expect(historyRepository.save).toHaveBeenCalledWith('typescript');
     });
 
     it('should propagate errors from the search provider', async () => {
@@ -75,14 +75,14 @@ describe('SearchService', () => {
       }
 
       // Assert
-      expect(historyService.save).not.toHaveBeenCalled();
+      expect(historyRepository.save).not.toHaveBeenCalled();
     });
 
     it('should return results even when history save fails', async () => {
       // Arrange
       const results = [{ title: 'React', url: 'https://reactjs.org' }];
       searchProvider.search.mockResolvedValue(results);
-      historyService.save.mockRejectedValue(new Error('Disk full'));
+      historyRepository.save.mockRejectedValue(new Error('Disk full'));
 
       // Act
       const response = await service.search('react');
@@ -93,19 +93,19 @@ describe('SearchService', () => {
   });
 
   describe('getHistory', () => {
-    it('should delegate to the history service', async () => {
+    it('should delegate to the history repository', async () => {
       // Arrange
       const history = [
         { query: 'react', timestamp: '2025-01-01T00:00:00.000Z' },
       ];
-      historyService.findAll.mockResolvedValue(history);
+      historyRepository.findAll.mockResolvedValue(history);
 
       // Act
       const result = await service.getHistory();
 
       // Assert
       expect(result).toEqual(history);
-      expect(historyService.findAll).toHaveBeenCalledTimes(1);
+      expect(historyRepository.findAll).toHaveBeenCalledTimes(1);
     });
   });
 });

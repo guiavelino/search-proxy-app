@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import axios from 'axios';
 import type { SearchResult } from '../../search.types';
-import type { SearchProvider } from '../search-provider.interface';
+import type { SearchProvider } from '../provider.interface';
 import type {
   DuckDuckGoResponse,
   DuckDuckGoTopic,

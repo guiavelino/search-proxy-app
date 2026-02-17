@@ -18,18 +18,20 @@ Pragmatic NestJS module structure — flat enough to avoid ceremony, structured 
 ```
 src/
   search/
-    provider/                        # Search provider abstraction + implementations
-      search-provider.interface.ts   # Interface + DI token (Liskov)
-      duckduckgo.provider.ts         # DuckDuckGo implementation
-      duckduckgo.types.ts            # DuckDuckGo API response types
-    history/                         # File-based history persistence
-      file-history.service.ts
-    search.types.ts                  # Domain types + constants
-    search.dto.ts                    # Request validation DTO (with trim transform)
-    search.controller.ts             # HTTP endpoints (explicit return types)
-    search.service.ts                # Orchestration (provider + history)
-    search.module.ts                 # Module wiring
-  app.config.ts                      # Shared config (ValidationPipe)
+    provider/                          # Search provider abstraction
+      provider.interface.ts            # SearchProvider interface + DI token (Liskov)
+      duckduckgo/                      # DuckDuckGo implementation
+        duckduckgo.provider.ts
+        duckduckgo.types.ts
+    history/                           # History persistence abstraction
+      history.interface.ts             # HistoryRepository interface + DI token
+      history.service.ts               # HistoryService (file-based implementation)
+    search.types.ts                    # Domain types + constants
+    search.dto.ts                      # Request validation DTO (with trim transform)
+    search.controller.ts               # HTTP endpoints (explicit return types)
+    search.service.ts                  # Orchestration (provider + history)
+    search.module.ts                   # Module wiring
+  app.config.ts                        # Shared config (ValidationPipe)
   app.module.ts
   main.ts
 ```

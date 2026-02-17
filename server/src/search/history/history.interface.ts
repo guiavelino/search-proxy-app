@@ -1,8 +1,8 @@
 import type { HistoryEntry } from '../search.types';
 
-export const HISTORY_SERVICE = Symbol('HISTORY_SERVICE');
+export const HISTORY_REPOSITORY = Symbol('HISTORY_REPOSITORY');
 
-export interface HistoryService {
+export interface HistoryRepository {
   save(query: string): Promise<void>;
   findAll(): Promise<HistoryEntry[]>;
 }
