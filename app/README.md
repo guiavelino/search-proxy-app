@@ -136,15 +136,15 @@ src/
 npm install
 ```
 
-### Environment Variables
+### Environment Setup
 
-Create a `.env` file (optional):
-
-```env
-VITE_API_BASE_URL=http://localhost:3000
+```bash
+cp .env.example .env
 ```
 
-Defaults to `http://localhost:3000` if not set.
+| Variable             | Default                  | Description           |
+| -------------------- | ------------------------ | --------------------- |
+| `VITE_API_BASE_URL`  | `http://localhost:3000`  | Backend API base URL  |
 
 ### Run Development Server
 
@@ -189,7 +189,7 @@ Tests are organized by **intent**, not by file location:
 | `integration/` | Component behavior with user interaction | type → search → see results |
 | `store/` | Zustand actions, state transitions, error handling | search with API failure, pagination bounds |
 
-**69 tests** across 7 test suites covering:
+**77 tests** across 7 test suites covering:
 - Happy paths and error scenarios
 - Race condition handling (AbortController + stale response discard)
 - Pagination bounds validation
@@ -208,6 +208,7 @@ Tests are organized by **intent**, not by file location:
 - **Match Counter** — Shows total highlighted matches on the current page
 - **Client-Side Pagination** — Results are paginated (5 per page) with bounds validation
 - **Search History Sidebar** — Shows previous searches with loading state; click to re-execute
+- **History Management** — Remove individual history entries or clear all history
 - **Request Cancellation** — In-flight requests are aborted when a new search starts
 - **Accessible** — ARIA labels, roles, live regions for screen readers
 - **Consistent Dates** — `Intl.DateTimeFormat` for locale-stable date rendering
@@ -216,8 +217,10 @@ Tests are organized by **intent**, not by file location:
 
 The frontend expects the following endpoints from the backend:
 
-| Method | Endpoint           | Description                |
-|--------|--------------------|----------------------------|
-| GET    | `/search?q=query`  | Search via query parameter |
-| POST   | `/search`          | Search via request body    |
-| GET    | `/search/history`  | Get search history         |
+| Method | Endpoint               | Description                        |
+| ------ | ---------------------- | ---------------------------------- |
+| GET    | `/search?q=query`      | Search via query parameter         |
+| POST   | `/search`              | Search via request body            |
+| GET    | `/search/history`      | Get search history                 |
+| DELETE | `/search/history/:index` | Remove a specific history entry  |
+| DELETE | `/search/history`      | Clear all history                  |

@@ -39,6 +39,7 @@ src/
 ### Key Decisions
 
 - **Provider abstraction (Liskov)**: `SearchProvider` interface allows swapping DuckDuckGo for any other provider without changing the service or controller. New providers just implement the interface and get registered in the module.
+- **History abstraction**: `HistoryRepository` interface decouples the persistence mechanism. The current implementation uses the file system, but swapping to Redis, a database, or any other storage only requires a new implementation and a module binding change.
 - **Centralized types**: `search.types.ts` holds domain types (`SearchResult`, `HistoryEntry`) and constants (`MAX_QUERY_LENGTH`, `MAX_HISTORY_ENTRIES`), mirroring the frontend's `model/search.ts` pattern.
 - **Single service layer**: Controller delegates everything to `SearchService` — no direct infrastructure access from the presentation layer.
 - **Unified DTO**: A single `SearchDto` is used for both GET and POST endpoints, eliminating duplication.
@@ -55,13 +56,27 @@ src/
 
 ## API Endpoints
 
-| Method | Endpoint           | Description                  |
-| ------ | ------------------ | ---------------------------- |
-| GET    | `/search?q=query`  | Search via query parameter   |
-| POST   | `/search`          | Search via request body `{q}`|
-| GET    | `/search/history`  | Get all search history       |
+| Method | Endpoint               | Description                        |
+| ------ | ---------------------- | ---------------------------------- |
+| GET    | `/search?q=query`      | Search via query parameter         |
+| POST   | `/search`              | Search via request body `{q}`      |
+| GET    | `/search/history`      | Get all search history             |
+| DELETE | `/search/history/:index` | Remove a specific history entry  |
+| DELETE | `/search/history`      | Clear all history                  |
 
 ## Getting Started
+
+### Environment Setup
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `PORT`   | `3000`  | Server port |
+
+### Install & Run
 
 ```bash
 # Install dependencies
@@ -80,31 +95,27 @@ npm run start:prod
 ## Tests
 
 ```bash
-# Unit tests (25 tests)
+# Unit tests (33 tests)
 npm test
 
-# Integration tests (7 tests)
+# Integration tests (10 tests)
 npm run test:integration
 
 # All tests at once
 npm run test:all
 ```
 
-**Total: 32 tests** covering service logic, provider parsing (including error handling and timeout), file persistence (including history cap), and full HTTP endpoint flows.
+**Total: 43 tests** covering service logic, provider parsing (including error handling and timeout), file persistence (including history cap), history removal/clearing, and full HTTP endpoint flows.
 
 ## Docker
 
 ```bash
 # From project root
+cp .env.example .env
+cd ..
 docker compose up --build
 ```
 
 The production Docker image uses a dedicated stage for production-only dependencies (`npm ci --omit=dev`), keeping the image lean.
 
 The server runs on port **3000** by default (configurable via `PORT` env var).
-
-## Environment
-
-| Variable | Default | Description  |
-| -------- | ------- | ------------ |
-| `PORT`   | `3000`  | Server port  |

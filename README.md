@@ -20,7 +20,10 @@ search-proxy-app/
 └── README.md
 ```
 
-Each sub-project has its own detailed `README.md` with architecture decisions, test strategy, and more.
+For detailed architecture, test strategy, and technical decisions, see each sub-project's README:
+
+- **[Frontend (app/)](./app/README.md)** — React architecture, Container Hook pattern, test strategy
+- **[Backend (server/)](./server/README.md)** — NestJS module structure, provider abstraction, API docs
 
 ## Quick Start
 
@@ -28,6 +31,29 @@ Each sub-project has its own detailed `README.md` with architecture decisions, t
 
 - Node.js >= 18
 - npm >= 9
+
+### Environment Setup (required)
+
+Before running the project, create the `.env` files for each sub-project:
+
+```bash
+cp app/.env.example app/.env
+cp server/.env.example server/.env
+```
+
+Review and adjust the values if needed:
+
+**`server/.env`**
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `PORT`   | `3000`  | Server port |
+
+**`app/.env`**
+
+| Variable             | Default                  | Description           |
+| -------------------- | ------------------------ | --------------------- |
+| `VITE_API_BASE_URL`  | `http://localhost:3000`  | Backend API base URL  |
 
 ### Run Locally (without Docker)
 
@@ -54,6 +80,8 @@ The app will be available at `http://localhost:5173`.
 ### Run with Docker
 
 ```bash
+cp app/.env.example app/.env
+cp server/.env.example server/.env
 docker compose up --build
 ```
 
@@ -64,7 +92,7 @@ docker compose up --build
 
 ## Tests
 
-### Backend (32 tests)
+### Backend (43 tests)
 
 ```bash
 cd server
@@ -79,7 +107,7 @@ npm run test:integration
 npm run test:all
 ```
 
-### Frontend (69 tests)
+### Frontend (77 tests)
 
 ```bash
 cd app
@@ -94,21 +122,26 @@ npm run test:run
 npm run test:coverage
 ```
 
+**Total: 120 tests** across both projects.
+
 ## API Endpoints
 
-| Method | Endpoint           | Description                  |
-| ------ | ------------------ | ---------------------------- |
-| GET    | `/search?q=query`  | Search via query parameter   |
-| POST   | `/search`          | Search via request body `{q}`|
-| GET    | `/search/history`  | Get all search history       |
+| Method | Endpoint               | Description                        |
+| ------ | ---------------------- | ---------------------------------- |
+| GET    | `/search?q=query`      | Search via query parameter         |
+| POST   | `/search`              | Search via request body `{q}`      |
+| GET    | `/search/history`      | Get all search history             |
+| DELETE | `/search/history/:index` | Remove a specific history entry  |
+| DELETE | `/search/history`      | Clear all history                  |
 
 ## Features
 
 - **Search proxy** — Backend forwards queries to DuckDuckGo and returns filtered results (title + url)
 - **Search history** — Persisted to local file, auto-loaded on server restart, capped at 100 entries
+- **History management** — Remove individual entries or clear all history
 - **Client-side pagination** — Results paginated in the frontend (5 per page)
 - **Search term highlighting** — Matching terms highlighted in results with match count
-- **History sidebar** — Click to re-execute past searches
+- **History sidebar** — Click to re-execute past searches, with remove and clear actions
 - **Request cancellation** — In-flight requests aborted when a new search starts
 - **Provider abstraction** — Backend uses Liskov-compliant interface, allowing easy provider swap
 - **Responsive UI** — Clean interface with SCSS, accessibility (ARIA), and loading states
