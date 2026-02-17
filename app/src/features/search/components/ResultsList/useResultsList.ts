@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { useSearch, usePagination } from '@/features/search/hooks'
+import { useSearchStore } from '@/features/search/store/search.store'
+import { RESULTS_PER_PAGE } from '@/features/search/model/search'
 import { highlightText, type HighlightMatch } from '@/features/search/utils/search.highlight'
 import type { SearchResult } from '@/features/search/model/search'
 
@@ -20,8 +21,17 @@ export interface ResultsListViewProps {
 }
 
 export function useResultsList(): ResultsListViewProps {
-  const { query, isLoading, error, results, hasSearched } = useSearch()
-  const { paginatedResults } = usePagination()
+  const query = useSearchStore((state) => state.query)
+  const isLoading = useSearchStore((state) => state.isLoading)
+  const error = useSearchStore((state) => state.error)
+  const results = useSearchStore((state) => state.results)
+  const hasSearched = useSearchStore((state) => state.hasSearched)
+  const currentPage = useSearchStore((state) => state.currentPage)
+
+  const paginatedResults = useMemo(() => {
+    const start = (currentPage - 1) * RESULTS_PER_PAGE
+    return results.slice(start, start + RESULTS_PER_PAGE)
+  }, [results, currentPage])
 
   const { highlightedResults, totalMatchCount } = useMemo(() => {
     const accumulated = paginatedResults.reduce<{

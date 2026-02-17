@@ -12,6 +12,7 @@ interface SearchData {
   isHistoryLoading: boolean
   hasSearched: boolean
   error: string | null
+  isSidebarOpen: boolean
 }
 
 interface SearchActions {
@@ -21,8 +22,8 @@ interface SearchActions {
   loadHistory: () => Promise<void>
   removeHistoryEntry: (index: number) => Promise<void>
   clearHistory: () => Promise<void>
-  getTotalPages: () => number
-  getPaginatedResults: () => SearchResult[]
+  toggleSidebar: () => void
+  closeSidebar: () => void
 }
 
 type SearchState = SearchData & SearchActions
@@ -48,6 +49,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   isHistoryLoading: false,
   hasSearched: false,
   error: null,
+  isSidebarOpen: false,
 
   setQuery: (query: string) => set({ query }),
 
@@ -71,7 +73,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
       set({ results, isLoading: false })
 
       // Reload history after a search (backend saves it) — fire-and-forget
-      get().loadHistory()
+      void get().loadHistory()
     } catch {
       if (searchId !== searchInternals.activeSearchId) return
 
@@ -84,7 +86,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   },
 
   setCurrentPage: (page: number) => {
-    const totalPages = get().getTotalPages()
+    const totalPages = Math.ceil(get().results.length / RESULTS_PER_PAGE)
     if (page < 1 || page > totalPages || totalPages === 0) return
     set({ currentPage: page })
   },
@@ -118,14 +120,6 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     }
   },
 
-  getTotalPages: () => {
-    const { results } = get()
-    return Math.ceil(results.length / RESULTS_PER_PAGE)
-  },
-
-  getPaginatedResults: () => {
-    const { results, currentPage } = get()
-    const start = (currentPage - 1) * RESULTS_PER_PAGE
-    return results.slice(start, start + RESULTS_PER_PAGE)
-  },
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  closeSidebar: () => set({ isSidebarOpen: false }),
 }))

@@ -1,10 +1,12 @@
 import { useCallback, useMemo } from 'react'
-import { usePagination as usePaginationState } from '@/features/search/hooks'
+import { useSearchStore } from '@/features/search/store/search.store'
+import { RESULTS_PER_PAGE } from '@/features/search/model/search'
+import { computeVisiblePages } from '@/features/search/utils/search.pagination'
 
 export interface PaginationViewProps {
   isVisible: boolean
   currentPage: number
-  pages: number[]
+  visiblePages: number[]
   isPreviousDisabled: boolean
   isNextDisabled: boolean
   onPageChange: (page: number) => void
@@ -13,14 +15,16 @@ export interface PaginationViewProps {
 }
 
 export function usePagination(): PaginationViewProps {
-  const { currentPage, setCurrentPage, totalPages, results } =
-    usePaginationState()
+  const currentPage = useSearchStore((state) => state.currentPage)
+  const setCurrentPage = useSearchStore((state) => state.setCurrentPage)
+  const results = useSearchStore((state) => state.results)
 
+  const totalPages = Math.ceil(results.length / RESULTS_PER_PAGE)
   const isVisible = results.length > 0 && totalPages > 1
 
-  const pages = useMemo(
-    () => Array.from({ length: totalPages }, (_, i) => i + 1),
-    [totalPages],
+  const visiblePages = useMemo(
+    () => computeVisiblePages(currentPage, totalPages),
+    [currentPage, totalPages],
   )
 
   const onPageChange = useCallback(
@@ -41,7 +45,7 @@ export function usePagination(): PaginationViewProps {
   return {
     isVisible,
     currentPage,
-    pages,
+    visiblePages,
     isPreviousDisabled: currentPage === 1,
     isNextDisabled: currentPage === totalPages,
     onPageChange,

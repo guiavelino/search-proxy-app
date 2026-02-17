@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { setupInterceptors } from './http.interceptors.ts'
+import { setupInterceptors } from './http.interceptors'
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { useSearch } from '@/features/search/hooks'
+import { useSearchStore } from '@/features/search/store/search.store'
 import { MAX_QUERY_LENGTH } from '@/features/search/model/search'
 
 export interface SearchInputViewProps {
@@ -12,7 +12,9 @@ export interface SearchInputViewProps {
 }
 
 export function useSearchInput(): SearchInputViewProps {
-  const { query, search, isLoading } = useSearch()
+  const query = useSearchStore((state) => state.query)
+  const search = useSearchStore((state) => state.search)
+  const isLoading = useSearchStore((state) => state.isLoading)
   const [inputValue, setInputValue] = useState(query)
 
   // Sync input when the store query changes externally (e.g., from history sidebar)

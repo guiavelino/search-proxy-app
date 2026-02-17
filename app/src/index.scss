@@ -15,6 +15,7 @@ html {
   line-height: 1.6;
   color: $color-text;
   background: $color-bg;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -29,4 +30,27 @@ a {
 button,
 input {
   font-family: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $color-border;
+  border-radius: 3px;
+
+  &:hover {
+    background: $color-text-muted;
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: $color-border transparent;
 }

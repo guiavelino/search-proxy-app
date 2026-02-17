@@ -22,6 +22,7 @@ describe('useSearchStore', () => {
       isHistoryLoading: false,
       hasSearched: false,
       error: null,
+      isSidebarOpen: false,
     })
   })
 
@@ -183,9 +184,12 @@ describe('useSearchStore', () => {
       await useSearchStore.getState().search('react')
     })
 
-    it('should calculate total pages correctly', () => {
+    it('should calculate total pages correctly from results', () => {
+      // Arrange
+      const { results } = useSearchStore.getState()
+
       // Act
-      const totalPages = useSearchStore.getState().getTotalPages()
+      const totalPages = Math.ceil(results.length / RESULTS_PER_PAGE)
 
       // Assert
       expect(totalPages).toBe(
@@ -193,21 +197,27 @@ describe('useSearchStore', () => {
       )
     })
 
-    it('should return the correct paginated results for page 1', () => {
+    it('should have the correct results for page 1', () => {
+      // Arrange
+      const { results, currentPage } = useSearchStore.getState()
+      const start = (currentPage - 1) * RESULTS_PER_PAGE
+
       // Act
-      const paginated = useSearchStore.getState().getPaginatedResults()
+      const paginated = results.slice(start, start + RESULTS_PER_PAGE)
 
       // Assert
       expect(paginated).toHaveLength(RESULTS_PER_PAGE)
       expect(paginated).toEqual(mockSearchResults.slice(0, RESULTS_PER_PAGE))
     })
 
-    it('should return the correct paginated results for page 2', () => {
+    it('should have the correct results for page 2', () => {
       // Arrange
       useSearchStore.getState().setCurrentPage(2)
+      const { results, currentPage } = useSearchStore.getState()
+      const start = (currentPage - 1) * RESULTS_PER_PAGE
 
       // Act
-      const paginated = useSearchStore.getState().getPaginatedResults()
+      const paginated = results.slice(start, start + RESULTS_PER_PAGE)
 
       // Assert
       expect(paginated).toEqual(
@@ -217,11 +227,13 @@ describe('useSearchStore', () => {
 
     it('should return remaining results for the last page', () => {
       // Arrange
-      const totalPages = useSearchStore.getState().getTotalPages()
+      const totalPages = Math.ceil(useSearchStore.getState().results.length / RESULTS_PER_PAGE)
       useSearchStore.getState().setCurrentPage(totalPages)
+      const { results, currentPage } = useSearchStore.getState()
+      const start = (currentPage - 1) * RESULTS_PER_PAGE
 
       // Act
-      const paginated = useSearchStore.getState().getPaginatedResults()
+      const paginated = results.slice(start, start + RESULTS_PER_PAGE)
 
       // Assert
       const expectedStart = (totalPages - 1) * RESULTS_PER_PAGE
@@ -254,7 +266,7 @@ describe('useSearchStore', () => {
 
     it('should ignore page above total pages', () => {
       // Arrange
-      const totalPages = useSearchStore.getState().getTotalPages()
+      const totalPages = Math.ceil(useSearchStore.getState().results.length / RESULTS_PER_PAGE)
 
       // Act
       useSearchStore.getState().setCurrentPage(totalPages + 1)

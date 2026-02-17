@@ -17,6 +17,7 @@ describe('HistorySidebar (Integration)', () => {
       isHistoryLoading: false,
       hasSearched: false,
       error: null,
+      isSidebarOpen: true,
     })
   })
 
@@ -153,7 +154,7 @@ describe('HistorySidebar (Integration)', () => {
     await waitFor(() => {
       expect(screen.getByText('react')).toBeInTheDocument()
     })
-    const dateElements = screen.getAllByText(/\d{1,2}\/\d{1,2}\/\d{4}/)
+    const dateElements = screen.getAllByText(/\d{2}\/\d{2}\/\d{4} - \d{2}:\d{2}:\d{2}/)
     expect(dateElements.length).toBeGreaterThan(0)
   })
 

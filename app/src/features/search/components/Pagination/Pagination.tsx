@@ -5,7 +5,7 @@ import './Pagination.scss'
 export const PaginationView = memo(function PaginationView({
   isVisible,
   currentPage,
-  pages,
+  visiblePages,
   isPreviousDisabled,
   isNextDisabled,
   onPageChange,
@@ -28,7 +28,7 @@ export const PaginationView = memo(function PaginationView({
       </button>
 
       <div className="pagination__pages">
-        {pages.map((page) => (
+        {visiblePages.map((page) => (
           <button
             key={page}
             className={`pagination__page ${

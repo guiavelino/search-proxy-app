@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import type { SearchInputViewProps } from './useSearchInput'
+import { Search } from 'lucide-react'
 import './SearchInput.scss'
 
 export const SearchInputView = memo(function SearchInputView({
@@ -13,6 +14,7 @@ export const SearchInputView = memo(function SearchInputView({
   return (
     <form className="search-input" onSubmit={onSubmit} role="search">
       <div className="search-input__wrapper">
+        <Search className="search-input__icon" size={20} />
         <input
           type="text"
           className="search-input__field"
@@ -32,7 +34,10 @@ export const SearchInputView = memo(function SearchInputView({
           {isLoading ? (
             <span className="search-input__spinner" aria-hidden="true" />
           ) : (
-            'Search'
+            <>
+              <span className="search-input__button-text">Search</span>
+              <Search className="search-input__button-icon" size={20} strokeWidth={2.5} />
+            </>
           )}
         </button>
       </div>

@@ -8,24 +8,43 @@
 
   &__wrapper {
     display: flex;
-    gap: 8px;
     align-items: center;
+    gap: 0;
+    position: relative;
+    background: $color-bg;
+    border: 2px solid $color-border;
+    border-radius: $radius-xl;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+    overflow: hidden;
+
+    &:focus-within {
+      border-color: $color-primary;
+      box-shadow: $shadow-focus;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $color-text-muted;
+    pointer-events: none;
+    flex-shrink: 0;
   }
 
   &__field {
     flex: 1;
-    padding: 12px 16px;
+    padding: 14px 16px 14px 48px;
     font-size: 1rem;
-    border: 2px solid $color-border;
-    border-radius: $radius-lg;
+    border: none;
     outline: none;
-    transition: border-color $transition-fast, box-shadow $transition-fast;
-    background: $color-bg;
+    background: transparent;
     color: $color-text;
+    min-width: 0;
 
-    &:focus {
-      border-color: $color-primary;
-      box-shadow: 0 0 0 3px $color-primary-light;
+    &::placeholder {
+      color: $color-text-muted;
     }
 
     &:disabled {
@@ -35,19 +54,18 @@
   }
 
   &__button {
-    padding: 12px 24px;
+    padding: 14px 28px;
     font-size: 1rem;
     font-weight: 600;
     color: $color-bg;
     background: $color-primary;
     border: none;
-    border-radius: $radius-lg;
     cursor: pointer;
-    transition: background $transition-fast, opacity $transition-fast;
-    min-width: 100px;
+    transition: background $transition-fast;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 
     &:hover:not(:disabled) {
       background: $color-primary-dark;
@@ -58,7 +76,25 @@
     }
   }
 
+  &__button-icon {
+    display: none;
+  }
+
   &__spinner {
     @include spinner(20px, 2px, #fff);
+  }
+
+  @include mobile {
+    &__button {
+      padding: 14px 16px;
+    }
+
+    &__button-text {
+      display: none;
+    }
+
+    &__button-icon {
+      display: block;
+    }
   }
 }
