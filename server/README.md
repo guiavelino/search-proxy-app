@@ -26,10 +26,10 @@ src/
       file-history.service.ts
     search.types.ts                  # Domain types + constants
     search.dto.ts                    # Request validation DTO
-    search.config.ts                 # Shared config (ValidationPipe)
-    search.controller.ts             # HTTP endpoints
+    search.controller.ts             # HTTP endpoints (explicit return types)
     search.service.ts                # Orchestration (provider + history)
     search.module.ts                 # Module wiring
+  app.config.ts                      # Shared config (ValidationPipe)
   app.module.ts
   main.ts
 ```
@@ -40,7 +40,7 @@ src/
 - **Centralized types**: `search.types.ts` holds domain types (`SearchResult`, `HistoryEntry`) and constants (`MAX_QUERY_LENGTH`, `MAX_HISTORY_ENTRIES`), mirroring the frontend's `model/search.ts` pattern.
 - **Single service layer**: Controller delegates everything to `SearchService` — no direct infrastructure access from the presentation layer.
 - **Unified DTO**: A single `SearchDto` is used for both GET and POST endpoints, eliminating duplication.
-- **Shared config**: `ValidationPipe` configuration is extracted to `search.config.ts`, shared between `main.ts` and integration tests.
+- **Shared config**: `ValidationPipe` configuration is extracted to `app.config.ts` at the app root, shared between `main.ts` and integration tests.
 - **Error handling**: Provider wraps API errors with meaningful messages and logs them via NestJS Logger. Bootstrap has `.catch()` with graceful shutdown.
 - **HTTP timeout**: External API calls have a 10s timeout to prevent hanging requests.
 - **History cap**: History is limited to the last 100 entries to prevent unbounded file growth.
@@ -81,6 +81,9 @@ npm test
 
 # Integration tests (7 tests)
 npm run test:integration
+
+# All tests at once
+npm run test:all
 ```
 
 **Total: 31 tests** covering service logic, provider parsing (including error handling and timeout), file persistence (including history cap), and full HTTP endpoint flows.

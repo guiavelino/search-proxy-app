@@ -9,4 +9,4 @@ function validationPipeConfig() {
         transform: true,
     });
 }
-//# sourceMappingURL=search.config.js.map
+//# sourceMappingURL=app.config.js.map

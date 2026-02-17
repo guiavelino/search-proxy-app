@@ -5,7 +5,7 @@ import { AppModule } from '../../src/app.module';
 import { SEARCH_PROVIDER } from '../../src/search/provider/search-provider.interface';
 import type { SearchProvider } from '../../src/search/provider/search-provider.interface';
 import { FileHistoryService } from '../../src/search/history/file-history.service';
-import { validationPipeConfig } from '../../src/search/search.config';
+import { validationPipeConfig } from '../../src/app.config';
 
 describe('SearchController (integration)', () => {
   let app: INestApplication;
