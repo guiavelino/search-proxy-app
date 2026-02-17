@@ -58,25 +58,30 @@ describe('HistoryService', () => {
       // Assert
       const entries = await service.findAll();
       expect(entries).toHaveLength(MAX_HISTORY_ENTRIES);
-      expect(entries[0].query).toBe('query-10');
-      expect(entries[entries.length - 1].query).toBe(
-        `query-${MAX_HISTORY_ENTRIES + 9}`,
-      );
     });
   });
 
   describe('findAll', () => {
-    it('should return all saved entries', async () => {
+    it('should return entries sorted by timestamp descending', async () => {
       // Arrange
-      mockedFs.writeFile.mockResolvedValue(undefined);
-      await service.save('react');
+      mockedFs.mkdir.mockResolvedValue(undefined);
+      mockedFs.readFile.mockResolvedValue(
+        JSON.stringify([
+          { query: 'oldest', timestamp: '2025-01-01T00:00:00.000Z' },
+          { query: 'newest', timestamp: '2025-01-03T00:00:00.000Z' },
+          { query: 'middle', timestamp: '2025-01-02T00:00:00.000Z' },
+        ]),
+      );
+      await service.onModuleInit();
 
       // Act
       const entries = await service.findAll();
 
-      // Assert
-      expect(entries).toHaveLength(1);
-      expect(entries[0].query).toBe('react');
+      // Assert — sorted by timestamp DESC
+      expect(entries).toHaveLength(3);
+      expect(entries[0].query).toBe('newest');
+      expect(entries[1].query).toBe('middle');
+      expect(entries[2].query).toBe('oldest');
     });
 
     it('should return a copy (not the internal array)', async () => {
@@ -90,21 +95,28 @@ describe('HistoryService', () => {
   });
 
   describe('removeAt', () => {
-    it('should remove the entry at the given index', async () => {
-      // Arrange
+    it('should remove the entry at the given sorted index', async () => {
+      // Arrange — load with explicit timestamps
+      mockedFs.mkdir.mockResolvedValue(undefined);
+      mockedFs.readFile.mockResolvedValue(
+        JSON.stringify([
+          { query: 'react', timestamp: '2025-01-01T00:00:00.000Z' },
+          { query: 'vue', timestamp: '2025-01-02T00:00:00.000Z' },
+          { query: 'angular', timestamp: '2025-01-03T00:00:00.000Z' },
+        ]),
+      );
       mockedFs.writeFile.mockResolvedValue(undefined);
-      await service.save('react');
-      await service.save('vue');
-      await service.save('angular');
+      await service.onModuleInit();
 
-      // Act
+      // Sorted order: angular(0), vue(1), react(2)
+      // Act — remove index 1 → removes vue
       await service.removeAt(1);
       const entries = await service.findAll();
 
       // Assert
       expect(entries).toHaveLength(2);
-      expect(entries[0].query).toBe('react');
-      expect(entries[1].query).toBe('angular');
+      expect(entries[0].query).toBe('angular');
+      expect(entries[1].query).toBe('react');
     });
 
     it('should persist after removing', async () => {
@@ -199,9 +211,10 @@ describe('HistoryService', () => {
       await service.onModuleInit();
       const entries = await service.findAll();
 
-      // Assert
+      // Assert — sorted by timestamp DESC
       expect(entries).toHaveLength(2);
-      expect(entries[0].query).toBe('react');
+      expect(entries[0].query).toBe('vue');
+      expect(entries[1].query).toBe('react');
     });
 
     it('should start empty when file does not exist', async () => {
@@ -231,12 +244,12 @@ describe('HistoryService', () => {
     });
 
     it('should cap loaded entries at MAX_HISTORY_ENTRIES', async () => {
-      // Arrange
+      // Arrange — each entry gets a distinct timestamp
       const oversizedHistory = Array.from(
         { length: MAX_HISTORY_ENTRIES + 50 },
         (_, i) => ({
           query: `query-${i}`,
-          timestamp: '2025-01-01T00:00:00.000Z',
+          timestamp: new Date(2025, 0, 1, 0, 0, i).toISOString(),
         }),
       );
       mockedFs.mkdir.mockResolvedValue(undefined);
@@ -246,9 +259,10 @@ describe('HistoryService', () => {
       await service.onModuleInit();
       const entries = await service.findAll();
 
-      // Assert
+      // Assert — capped to last MAX entries, sorted by timestamp DESC
       expect(entries).toHaveLength(MAX_HISTORY_ENTRIES);
-      expect(entries[0].query).toBe('query-50');
+      expect(entries[0].query).toBe(`query-${MAX_HISTORY_ENTRIES + 49}`);
+      expect(entries[entries.length - 1].query).toBe('query-50');
     });
   });
 });

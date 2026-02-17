@@ -30,13 +30,23 @@ export class HistoryService implements HistoryRepository, OnModuleInit {
   }
 
   async findAll(): Promise<HistoryEntry[]> {
-    return [...this.entries];
+    return [...this.entries].sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
   }
 
   async removeAt(index: number): Promise<void> {
-    if (index < 0 || index >= this.entries.length) return;
+    const sorted = await this.findAll();
+    if (index < 0 || index >= sorted.length) return;
 
-    this.entries.splice(index, 1);
+    const target = sorted[index];
+    const internalIndex = this.entries.findIndex(
+      (e) => e.query === target.query && e.timestamp === target.timestamp,
+    );
+
+    if (internalIndex === -1) return;
+    this.entries.splice(internalIndex, 1);
     await this.persist();
   }
 
